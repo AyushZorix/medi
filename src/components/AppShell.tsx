@@ -13,7 +13,7 @@ import {
   User,
 } from "lucide-react";
 
-const nav = [
+const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/app/applications", label: "Applications", icon: FolderKanban },
   { to: "/app/pipeline", label: "AI Pipeline", icon: Workflow },
@@ -21,7 +21,7 @@ const nav = [
   { to: "/app/decisions", label: "Decisions", icon: Gavel },
   { to: "/app/notifications", label: "Notifications", icon: Bell },
   { to: "/app/admin", label: "Attorney Panel", icon: ShieldCheck },
-] as const;
+];
 
 export function AppShell() {
   const path = useRouterState({ select: (s) => s.location.pathname });
