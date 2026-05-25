@@ -9,7 +9,7 @@ export const Route = createFileRoute("/app/applications/$id")({
 
 function AppDetail() {
   const { id } = Route.useParams();
-  const name = id.split("-").map((s) => s[0].toUpperCase() + s.slice(1)).join(" ");
+  const name = id.split("-").map((s: string) => s[0].toUpperCase() + s.slice(1)).join(" ");
 
   return (
     <div className="space-y-6 animate-[fade-up_0.6s_ease-out]">
