@@ -282,7 +282,7 @@ function SignInForm({
             <polyline points="2 8.5 12 12" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white mt-1">Sign in to VisaIQ</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-white mt-1">Sign in to VisaIQ</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Sign in to your ${portal === "attorney" ? "attorney" : "applicant"} portal`
@@ -322,8 +322,12 @@ function SignInForm({
             disabled={loading}
           />
         </div>
-        <Button type="submit" variant="outline" className="mt-2 w-full flex items-center justify-center gap-2" disabled={loading}>
-          {loading && <Loader2 className="size-4 animate-spin" />}
+        <Button 
+          type="submit" 
+          className="mt-2 w-full h-11 bg-gradient-to-r from-[oklch(0.76_0.15_262)] to-[oklch(0.65_0.15_275)] text-white font-medium shadow-[0_4px_20px_rgba(124,58,237,0.2)] hover:shadow-[0_4px_30px_rgba(124,58,237,0.35)] transition-all duration-300 border-none active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2" 
+          disabled={loading}
+        >
+          {loading && <Loader2 className="size-4 animate-spin mr-2" />}
           Sign In
         </Button>
       </div>
@@ -376,7 +380,7 @@ function SignUpForm({
             <polyline points="2 8.5 12 12" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white mt-1">Create your account</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-white mt-1">Create your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Create your ${portal === "attorney" ? "attorney" : "applicant"} account`
@@ -430,8 +434,12 @@ function SignUpForm({
             disabled={loading}
           />
         </div>
-        <Button type="submit" variant="outline" className="mt-2 w-full flex items-center justify-center gap-2" disabled={loading}>
-          {loading && <Loader2 className="size-4 animate-spin" />}
+        <Button 
+          type="submit" 
+          className="mt-2 w-full h-11 bg-gradient-to-r from-[oklch(0.76_0.15_262)] to-[oklch(0.65_0.15_275)] text-white font-medium shadow-[0_4px_20px_rgba(124,58,237,0.2)] hover:shadow-[0_4px_30px_rgba(124,58,237,0.35)] transition-all duration-300 border-none active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2" 
+          disabled={loading}
+        >
+          {loading && <Loader2 className="size-4 animate-spin mr-2" />}
           Sign Up
         </Button>
       </div>
@@ -671,6 +679,19 @@ export function AuthUI({ portalLock, search }: AuthUIProps) {
   const [portal, setPortal] = useState<PortalKind>(initialPortal);
   const portalLocked = Boolean(portalLock);
 
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = React.useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setCoords({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-transparent text-foreground relative z-10 overflow-hidden py-12 px-4">
       {/* Background Spotlights */}
@@ -685,20 +706,52 @@ export function AuthUI({ portalLock, search }: AuthUIProps) {
       `}</style>
       
       <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         initial={{ opacity: 0, y: 30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{ scale: 1.005 }}
-        className="w-full max-w-[440px] px-8 py-10 rounded-2xl border border-white/[0.08] bg-black/60 backdrop-blur-2xl shadow-[0_0_50px_rgba(124,58,237,0.06)] relative z-10"
+        className="w-full max-w-[450px] px-8 py-10 rounded-3xl border border-white/[0.08] bg-black/55 backdrop-blur-3xl shadow-[0_0_50px_rgba(124,58,237,0.06)] relative z-10 overflow-hidden transition-all duration-300"
       >
-        <AuthFormContainer
-          isSignIn={isSignIn}
-          onToggle={toggleForm}
-          portal={portal}
-          setPortal={setPortal}
-          portalLocked={portalLocked}
-          search={search}
-        />
+        {/* Subtle inner background glow */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent pointer-events-none" />
+
+        {/* Background Spotlight overlay */}
+        {isHovered && (
+          <div
+            className="pointer-events-none absolute -inset-px rounded-3xl opacity-100 transition-opacity duration-300 z-0"
+            style={{
+              background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, rgba(124, 58, 237, 0.08), transparent 80%)`,
+            }}
+          />
+        )}
+        {/* Light border glow */}
+        {isHovered && (
+          <div
+            className="pointer-events-none absolute -inset-px rounded-3xl opacity-100 transition-opacity duration-300 z-10"
+            style={{
+              background: `radial-gradient(100px circle at ${coords.x}px ${coords.y}px, rgba(124, 58, 237, 0.3), transparent 80%)`,
+              border: "1px solid transparent",
+              WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "destination-out",
+              maskComposite: "exclude",
+            }}
+          />
+        )}
+
+        <div className="relative z-20">
+          <AuthFormContainer
+            isSignIn={isSignIn}
+            onToggle={toggleForm}
+            portal={portal}
+            setPortal={setPortal}
+            portalLocked={portalLocked}
+            search={search}
+          />
+        </div>
       </motion.div>
     </div>
   );
