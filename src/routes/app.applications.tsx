@@ -1,92 +1,124 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal } from "lucide-react";
+
+import { listApplications } from "@/lib/applications";
+
+import { AppPage } from "@/components/AppPage";
+import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, VisaBadge } from "@/components/StatusBadge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScoreBar } from "@/components/ScoreBar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { GlassCard } from "@/components/GlassCard";
 
 export const Route = createFileRoute("/app/applications")({
   head: () => ({ meta: [{ title: "Applications — VisaIQ" }] }),
   component: Applications,
 });
 
-const rows = [
-  { id: "amelia-chen", name: "Amelia Chen", visa: "F-1", status: "approved", score: 96, updated: "2m ago" },
-  { id: "rohan-patel", name: "Rohan Patel", visa: "O-1", status: "processing", score: 88, updated: "3m ago" },
-  { id: "sofia-marquez", name: "Sofia Marquez", visa: "B-2", status: "needs_info", score: 71, updated: "8m ago" },
-  { id: "daniel-okafor", name: "Daniel Okafor", visa: "F-1", status: "approved", score: 92, updated: "12m ago" },
-  { id: "yuki-tanaka", name: "Yuki Tanaka", visa: "O-1", status: "rejected", score: 42, updated: "18m ago" },
-  { id: "liam-oconnor", name: "Liam O'Connor", visa: "B-1", status: "approved", score: 89, updated: "24m ago" },
-  { id: "isabela-rocha", name: "Isabela Rocha", visa: "F-1", status: "processing", score: 81, updated: "31m ago" },
-  { id: "noor-al-sayed", name: "Noor Al-Sayed", visa: "O-1", status: "needs_info", score: 67, updated: "1h ago" },
-  { id: "wei-zhang", name: "Wei Zhang", visa: "B-2", status: "approved", score: 94, updated: "1h ago" },
-] as const;
-
 function Applications() {
-  return (
-    <div className="space-y-6 animate-[fade-up_0.6s_ease-out]">
-      <div>
-        <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Caseload</div>
-        <h1 className="text-3xl font-semibold tracking-tight mt-1">Applications</h1>
-      </div>
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["applications"],
+    queryFn: listApplications,
+  });
 
-      <div className="flex flex-col sm:flex-row gap-3">
+  return (
+    <AppPage>
+      <PageHeader portal="attorney" eyebrow="Case management" title="All applications" description="Search, filter, and open any applicant case in your queue." />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
             placeholder="Search by name, case ID, or country…"
-            className="w-full h-10 rounded-lg bg-muted/40 border border-border/60 pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
+            className="h-10 border-border/60 bg-muted/40 pl-9"
           />
         </div>
-        <div className="flex gap-2">
-          {["All", "F-1", "O-1", "B-1", "B-2"].map((t, i) => (
-            <button
-              key={t}
-              className={`h-10 px-3 rounded-lg text-sm transition ${
-                i === 0 ? "bg-primary/15 text-primary border border-primary/30" : "glass hover:bg-white/[0.06]"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-          <button className="h-10 px-3 rounded-lg glass hover:bg-white/[0.06] transition flex items-center gap-1.5 text-sm">
-            <SlidersHorizontal className="size-3.5" /> Filters
-          </button>
-        </div>
+        <Tabs defaultValue="all" className="w-auto">
+          <TabsList className="glass h-10">
+            {(["All", "F-1", "O-1", "B-1", "B-2"] as const).map((t) => (
+              <TabsTrigger key={t} value={t === "All" ? "all" : t.toLowerCase()}>
+                {t}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <Button variant="glass" className="h-10 shrink-0">
+          <SlidersHorizontal className="size-3.5" /> Filters
+        </Button>
       </div>
 
-      <div className="rounded-2xl glass overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 px-5 py-3 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/40">
-          <div className="col-span-4">Applicant</div>
-          <div className="col-span-2">Visa</div>
-          <div className="col-span-2">Status</div>
-          <div className="col-span-2">AI score</div>
-          <div className="col-span-2 text-right">Updated</div>
-        </div>
-        {rows.map((r) => (
-          <Link
-            key={r.id}
-            to="/app/applications/$id"
-            params={{ id: r.id }}
-            className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center text-sm border-b border-border/30 hover:bg-white/[0.03] transition"
-          >
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="size-8 rounded-full bg-gradient-primary grid place-items-center text-[11px] font-medium">
-                {r.name.split(" ").map((n) => n[0]).join("")}
-              </div>
-              <div className="font-medium truncate">{r.name}</div>
-            </div>
-            <div className="col-span-2"><VisaBadge type={r.visa} /></div>
-            <div className="col-span-2"><StatusBadge status={r.status} /></div>
-            <div className="col-span-2">
-              <div className="flex items-center gap-2">
-                <div className="h-1 w-16 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-gradient-aurora" style={{ width: `${r.score}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground tabular-nums">{r.score}%</span>
-              </div>
-            </div>
-            <div className="col-span-2 text-right text-xs text-muted-foreground">{r.updated}</div>
-          </Link>
-        ))}
-      </div>
-    </div>
+      <GlassCard className="overflow-hidden p-0">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-border/40 hover:bg-transparent">
+              <TableHead className="text-[11px] uppercase tracking-wider">Applicant</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider">Visa</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-[11px] uppercase tracking-wider">AI score</TableHead>
+              <TableHead className="text-right text-[11px] uppercase tracking-wider">Updated</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                  Loading applications…
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                  No applications in the database yet.
+                </TableCell>
+              </TableRow>
+            )}
+            {rows.map((r) => (
+              <TableRow key={r.id} className="border-border/30 hover:bg-white/[0.03]">
+                <TableCell>
+                  <Link
+                    to="/app/applications/$id"
+                    params={{ id: r.slug }}
+                    className="flex items-center gap-3 font-medium"
+                  >
+                    <Avatar className="size-8">
+                      <AvatarFallback className="bg-gradient-primary text-[11px] text-primary-foreground">
+                        {r.applicantName.split(" ").map((n) => n[0]).join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    {r.applicantName}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  <VisaBadge type={r.visaType} />
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={r.status} />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <ScoreBar value={r.score} className="w-16" />
+                    <span className="text-xs tabular-nums text-muted-foreground">{r.score}%</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right text-xs text-muted-foreground">{r.updated}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </GlassCard>
+    </AppPage>
   );
 }

@@ -9,9 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as PortalRouteImport } from './routes/portal'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as SignInAttorneyRouteImport } from './routes/sign-in.attorney'
+import { Route as SignInApplicantRouteImport } from './routes/sign-in.applicant'
+import { Route as PortalMessagesRouteImport } from './routes/portal.messages'
+import { Route as PortalDocumentsRouteImport } from './routes/portal.documents'
+import { Route as PortalApplicationRouteImport } from './routes/portal.application'
 import { Route as AppPipelineRouteImport } from './routes/app.pipeline'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppDocumentsRouteImport } from './routes/app.documents'
@@ -20,6 +29,21 @@ import { Route as AppApplicationsRouteImport } from './routes/app.applications'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppApplicationsIdRouteImport } from './routes/app.applications.$id'
 
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -30,10 +54,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PortalRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const SignInAttorneyRoute = SignInAttorneyRouteImport.update({
+  id: '/attorney',
+  path: '/attorney',
+  getParentRoute: () => SignInRoute,
+} as any)
+const SignInApplicantRoute = SignInApplicantRouteImport.update({
+  id: '/applicant',
+  path: '/applicant',
+  getParentRoute: () => SignInRoute,
+} as any)
+const PortalMessagesRoute = PortalMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalDocumentsRoute = PortalDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => PortalRoute,
+} as any)
+const PortalApplicationRoute = PortalApplicationRouteImport.update({
+  id: '/application',
+  path: '/application',
+  getParentRoute: () => PortalRoute,
 } as any)
 const AppPipelineRoute = AppPipelineRouteImport.update({
   id: '/pipeline',
@@ -74,37 +128,63 @@ const AppApplicationsIdRoute = AppApplicationsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
+  '/sign-in': typeof SignInRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/applications': typeof AppApplicationsRouteWithChildren
   '/app/decisions': typeof AppDecisionsRoute
   '/app/documents': typeof AppDocumentsRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/pipeline': typeof AppPipelineRoute
+  '/portal/application': typeof PortalApplicationRoute
+  '/portal/documents': typeof PortalDocumentsRoute
+  '/portal/messages': typeof PortalMessagesRoute
+  '/sign-in/applicant': typeof SignInApplicantRoute
+  '/sign-in/attorney': typeof SignInAttorneyRoute
   '/app/': typeof AppIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/sign-in': typeof SignInRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/applications': typeof AppApplicationsRouteWithChildren
   '/app/decisions': typeof AppDecisionsRoute
   '/app/documents': typeof AppDocumentsRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/pipeline': typeof AppPipelineRoute
+  '/portal/application': typeof PortalApplicationRoute
+  '/portal/documents': typeof PortalDocumentsRoute
+  '/portal/messages': typeof PortalMessagesRoute
+  '/sign-in/applicant': typeof SignInApplicantRoute
+  '/sign-in/attorney': typeof SignInAttorneyRoute
   '/app': typeof AppIndexRoute
+  '/portal': typeof PortalIndexRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/portal': typeof PortalRouteWithChildren
+  '/sign-in': typeof SignInRouteWithChildren
   '/app/admin': typeof AppAdminRoute
   '/app/applications': typeof AppApplicationsRouteWithChildren
   '/app/decisions': typeof AppDecisionsRoute
   '/app/documents': typeof AppDocumentsRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/pipeline': typeof AppPipelineRoute
+  '/portal/application': typeof PortalApplicationRoute
+  '/portal/documents': typeof PortalDocumentsRoute
+  '/portal/messages': typeof PortalMessagesRoute
+  '/sign-in/applicant': typeof SignInApplicantRoute
+  '/sign-in/attorney': typeof SignInAttorneyRoute
   '/app/': typeof AppIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
 }
 export interface FileRouteTypes {
@@ -112,46 +192,96 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/login'
+    | '/portal'
+    | '/sign-in'
     | '/app/admin'
     | '/app/applications'
     | '/app/decisions'
     | '/app/documents'
     | '/app/notifications'
     | '/app/pipeline'
+    | '/portal/application'
+    | '/portal/documents'
+    | '/portal/messages'
+    | '/sign-in/applicant'
+    | '/sign-in/attorney'
     | '/app/'
+    | '/portal/'
     | '/app/applications/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/sign-in'
     | '/app/admin'
     | '/app/applications'
     | '/app/decisions'
     | '/app/documents'
     | '/app/notifications'
     | '/app/pipeline'
+    | '/portal/application'
+    | '/portal/documents'
+    | '/portal/messages'
+    | '/sign-in/applicant'
+    | '/sign-in/attorney'
     | '/app'
+    | '/portal'
     | '/app/applications/$id'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/login'
+    | '/portal'
+    | '/sign-in'
     | '/app/admin'
     | '/app/applications'
     | '/app/decisions'
     | '/app/documents'
     | '/app/notifications'
     | '/app/pipeline'
+    | '/portal/application'
+    | '/portal/documents'
+    | '/portal/messages'
+    | '/sign-in/applicant'
+    | '/sign-in/attorney'
     | '/app/'
+    | '/portal/'
     | '/app/applications/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  PortalRoute: typeof PortalRouteWithChildren
+  SignInRoute: typeof SignInRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -166,12 +296,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/': {
+      id: '/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof PortalRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/sign-in/attorney': {
+      id: '/sign-in/attorney'
+      path: '/attorney'
+      fullPath: '/sign-in/attorney'
+      preLoaderRoute: typeof SignInAttorneyRouteImport
+      parentRoute: typeof SignInRoute
+    }
+    '/sign-in/applicant': {
+      id: '/sign-in/applicant'
+      path: '/applicant'
+      fullPath: '/sign-in/applicant'
+      preLoaderRoute: typeof SignInApplicantRouteImport
+      parentRoute: typeof SignInRoute
+    }
+    '/portal/messages': {
+      id: '/portal/messages'
+      path: '/messages'
+      fullPath: '/portal/messages'
+      preLoaderRoute: typeof PortalMessagesRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/documents': {
+      id: '/portal/documents'
+      path: '/documents'
+      fullPath: '/portal/documents'
+      preLoaderRoute: typeof PortalDocumentsRouteImport
+      parentRoute: typeof PortalRoute
+    }
+    '/portal/application': {
+      id: '/portal/application'
+      path: '/application'
+      fullPath: '/portal/application'
+      preLoaderRoute: typeof PortalApplicationRouteImport
+      parentRoute: typeof PortalRoute
     }
     '/app/pipeline': {
       id: '/app/pipeline'
@@ -259,10 +431,53 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PortalRouteChildren {
+  PortalApplicationRoute: typeof PortalApplicationRoute
+  PortalDocumentsRoute: typeof PortalDocumentsRoute
+  PortalMessagesRoute: typeof PortalMessagesRoute
+  PortalIndexRoute: typeof PortalIndexRoute
+}
+
+const PortalRouteChildren: PortalRouteChildren = {
+  PortalApplicationRoute: PortalApplicationRoute,
+  PortalDocumentsRoute: PortalDocumentsRoute,
+  PortalMessagesRoute: PortalMessagesRoute,
+  PortalIndexRoute: PortalIndexRoute,
+}
+
+const PortalRouteWithChildren =
+  PortalRoute._addFileChildren(PortalRouteChildren)
+
+interface SignInRouteChildren {
+  SignInApplicantRoute: typeof SignInApplicantRoute
+  SignInAttorneyRoute: typeof SignInAttorneyRoute
+}
+
+const SignInRouteChildren: SignInRouteChildren = {
+  SignInApplicantRoute: SignInApplicantRoute,
+  SignInAttorneyRoute: SignInAttorneyRoute,
+}
+
+const SignInRouteWithChildren =
+  SignInRoute._addFileChildren(SignInRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  PortalRoute: PortalRouteWithChildren,
+  SignInRoute: SignInRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

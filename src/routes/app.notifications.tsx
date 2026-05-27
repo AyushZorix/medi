@@ -1,5 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, MessageSquare, Bell } from "lucide-react";
+import { Mail, MessageSquare, Bell, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
+
+import { AppPage } from "@/components/AppPage";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from "@/components/GlassCard";
 
 export const Route = createFileRoute("/app/notifications")({
   head: () => ({ meta: [{ title: "Notifications — VisaIQ" }] }),
@@ -7,45 +17,120 @@ export const Route = createFileRoute("/app/notifications")({
 });
 
 const items = [
-  { t: "2m", c: "email", title: "Decision sent to Amelia Chen", body: "Approval notification · F-1" },
-  { t: "8m", c: "sms", title: "SMS alert to Sofia Marquez", body: "Additional documentation requested" },
-  { t: "12m", c: "app", title: "Daniel Okafor approved", body: "AI confidence 92% · attorney signoff complete" },
-  { t: "1h", c: "email", title: "Weekly digest sent", body: "47 cases summarised for compliance team" },
+  { t: "2m", c: "email" as const, title: "Approved: Amelia Chen", body: "F-1 application approved · Confirmation email sent", unread: true },
+  { t: "8m", c: "sms" as const, title: "Sofia Marquez: More info needed", body: "Follow-up documents requested · Text alert sent", unread: true },
+  { t: "12m", c: "app" as const, title: "Approved: Daniel Okafor", body: "AI confidence 92% · Attorney signed off", unread: true },
+  { t: "1h", c: "email" as const, title: "Weekly summary", body: "47 cases processed · Compliance team updated", unread: false },
+  { t: "3h", c: "app" as const, title: "Pipeline completed", body: "Rohan Patel O-1 · Consistency check flagged 1 item", unread: false },
 ];
 
 const iconMap = { email: Mail, sms: MessageSquare, app: Bell };
+const channelLabel = { email: "Email", sms: "SMS", app: "In-app" };
+
+function NotificationList({ filter }: { filter?: "email" | "sms" | "app" }) {
+  const list = filter ? items.filter((i) => i.c === filter) : items;
+  return (
+    <ScrollArea className="h-[min(480px,55vh)] pr-4">
+      <div className="relative space-y-1">
+        <div className="absolute bottom-2 left-5 top-2 w-px bg-border" />
+        {list.map((i) => {
+          const Icon = iconMap[i.c];
+          return (
+            <button
+              key={i.title}
+              type="button"
+              onClick={() => toast.success(i.title, { description: i.body })}
+              className={`relative flex w-full gap-4 rounded-xl border border-transparent p-4 text-left transition hover:border-border/40 hover:bg-white/[0.03] ${i.unread ? "border-primary/20 bg-primary/5" : ""}`}
+            >
+              <div className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full border border-border/60 glass">
+                <Icon className="size-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1 pt-0.5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{i.title}</span>
+                    {i.unread && <span className="size-2 rounded-full bg-primary" />}
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">{i.t} ago</span>
+                </div>
+                <p className="mt-0.5 text-sm text-muted-foreground">{i.body}</p>
+                <Badge variant="secondary" className="mt-2">
+                  {channelLabel[i.c]}
+                </Badge>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </ScrollArea>
+  );
+}
 
 function Notifications() {
+  const unread = items.filter((i) => i.unread).length;
+
   return (
-    <div className="space-y-6 animate-[fade-up_0.6s_ease-out]">
-      <div>
-        <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Channel timeline</div>
-        <h1 className="text-3xl font-semibold tracking-tight mt-1">Notifications</h1>
-      </div>
-      <div className="rounded-2xl glass p-6">
-        <div className="relative">
-          <div className="absolute left-5 top-2 bottom-2 w-px bg-border/60" />
-          <div className="space-y-6">
-            {items.map((i) => {
-              const Icon = iconMap[i.c as keyof typeof iconMap];
-              return (
-                <div key={i.title} className="flex gap-4 relative">
-                  <div className="size-10 rounded-full glass-strong grid place-items-center relative z-10">
-                    <Icon className="size-4 text-primary" />
-                  </div>
-                  <div className="flex-1 pt-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-sm">{i.title}</div>
-                      <div className="text-xs text-muted-foreground">{i.t} ago</div>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-0.5">{i.body}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AppPage>
+      <PageHeader
+        portal="attorney"
+        eyebrow="Activity"
+        title="Notifications"
+        description={`${unread} unread updates across email, SMS, and in-app alerts.`}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.message("All notifications marked read")}
+          >
+            <CheckCheck className="size-3.5" /> Mark all read
+          </Button>
+        }
+      />
+
+      <Tabs defaultValue="all">
+        <TabsList className="glass h-10">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="sms">SMS</TabsTrigger>
+          <TabsTrigger value="app">In-app</TabsTrigger>
+        </TabsList>
+        <TabsContent value="all" className="mt-4">
+          <GlassCard>
+            <GlassCardHeader>
+              <GlassCardTitle className="text-base">Recent activity</GlassCardTitle>
+            </GlassCardHeader>
+            <GlassCardContent className="pt-0">
+              <NotificationList />
+            </GlassCardContent>
+          </GlassCard>
+        </TabsContent>
+        <TabsContent value="email" className="mt-4">
+          <GlassCard>
+            <GlassCardContent className="pt-6">
+              <NotificationList filter="email" />
+            </GlassCardContent>
+          </GlassCard>
+        </TabsContent>
+        <TabsContent value="sms" className="mt-4">
+          <GlassCard>
+            <GlassCardContent className="pt-6">
+              <NotificationList filter="sms" />
+            </GlassCardContent>
+          </GlassCard>
+        </TabsContent>
+        <TabsContent value="app" className="mt-4">
+          <GlassCard>
+            <GlassCardContent className="pt-6">
+              <NotificationList filter="app" />
+            </GlassCardContent>
+          </GlassCard>
+        </TabsContent>
+      </Tabs>
+
+      <Separator />
+      <p className="text-center text-xs text-muted-foreground">
+        Click any notification to preview a toast — wired with shadcn Sonner.
+      </p>
+    </AppPage>
   );
 }

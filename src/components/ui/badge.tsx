@@ -14,6 +14,14 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
+        approved: "bg-success/10 text-success border-success/30",
+        processing: "bg-primary/10 text-primary border-primary/30",
+        needs_info: "bg-warning/10 text-warning border-warning/30",
+        rejected: "bg-destructive/10 text-destructive border-destructive/30",
+        visa_f1: "bg-indigo/15 text-indigo border-indigo/30 font-mono text-[10px] tracking-tight",
+        visa_o1: "bg-violet/15 text-violet border-violet/30 font-mono text-[10px] tracking-tight",
+        visa_b1: "bg-teal/15 text-teal border-teal/30 font-mono text-[10px] tracking-tight",
+        visa_b2: "bg-warning/10 text-warning border-warning/30 font-mono text-[10px] tracking-tight",
       },
     },
     defaultVariants: {

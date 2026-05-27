@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PipelineFlow } from "@/components/PipelineFlow";
 import { CheckCircle2, AlertTriangle, Play, RefreshCw } from "lucide-react";
+
+import { AppPage } from "@/components/AppPage";
+import { PageHeader } from "@/components/PageHeader";
+import { PipelineFlow } from "@/components/PipelineFlow";
+import { Button } from "@/components/ui/button";
+import { ScoreBar } from "@/components/ScoreBar";
+import { Separator } from "@/components/ui/separator";
+import { GlassCard, GlassCardContent, GlassCardHeader, GlassCardTitle } from "@/components/GlassCard";
 
 export const Route = createFileRoute("/app/pipeline")({
   head: () => ({ meta: [{ title: "AI Pipeline — VisaIQ" }] }),
@@ -15,46 +22,55 @@ const reasoning = [
 
 function Pipeline() {
   return (
-    <div className="space-y-8 animate-[fade-up_0.6s_ease-out]">
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Live observability</div>
-          <h1 className="text-3xl font-semibold tracking-tight mt-1">AI Pipeline</h1>
-          <p className="text-sm text-muted-foreground mt-1">Case #VIQ-2847 · Rohan Patel · O-1 Extraordinary Ability</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="h-9 px-3 rounded-lg glass hover:bg-white/[0.06] text-sm flex items-center gap-1.5">
-            <RefreshCw className="size-3.5" /> Re-run
-          </button>
-          <button className="h-9 px-3 rounded-lg bg-gradient-primary text-primary-foreground text-sm flex items-center gap-1.5 shadow-glow">
-            <Play className="size-3.5" /> Continue
-          </button>
-        </div>
-      </div>
+    <AppPage className="space-y-8">
+      <PageHeader
+        portal="attorney"
+        eyebrow="Processing case"
+        title="Review in progress"
+        description="Rohan Patel · O-1 Visa · Case #VIQ-2847"
+        actions={
+          <>
+            <Button variant="glass" size="sm">
+              <RefreshCw className="size-3.5" /> Restart
+            </Button>
+            <Button variant="gradient" size="sm">
+              <Play className="size-3.5" /> Resume
+            </Button>
+          </>
+        }
+      />
 
-      <div className="rounded-3xl glass-strong p-8 md:p-12">
+      <GlassCard intensity="strong" className="p-8 md:p-12">
         <PipelineFlow />
-      </div>
+      </GlassCard>
 
-      <div className="grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-2xl glass p-6">
-          <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mb-4">Reasoning trace</div>
-          <div className="space-y-4">
+      <div className="grid gap-5 lg:grid-cols-3">
+        <GlassCard className="lg:col-span-2">
+          <GlassCardHeader>
+            <GlassCardTitle className="text-xs uppercase tracking-[0.16em] text-muted-foreground font-normal">
+              What we found
+            </GlassCardTitle>
+          </GlassCardHeader>
+          <GlassCardContent className="space-y-4 pt-0">
             {reasoning.map((r) => (
-              <div key={r.title} className="flex gap-3 p-4 rounded-xl bg-muted/30 border border-border/40">
+              <div key={r.title} className="flex gap-3 rounded-xl border border-border/40 bg-muted/30 p-4">
                 <r.icon className={`size-5 shrink-0 mt-0.5 ${r.color}`} />
                 <div>
-                  <div className="font-medium text-sm">{r.title}</div>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{r.body}</p>
+                  <div className="text-sm font-medium">{r.title}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{r.body}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
+          </GlassCardContent>
+        </GlassCard>
 
-        <div className="rounded-2xl glass p-6">
-          <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground mb-4">Confidence breakdown</div>
-          <div className="space-y-3">
+        <GlassCard>
+          <GlassCardHeader>
+            <GlassCardTitle className="text-xs uppercase tracking-[0.16em] text-muted-foreground font-normal">
+              Confidence score
+            </GlassCardTitle>
+          </GlassCardHeader>
+          <GlassCardContent className="space-y-3 pt-0">
             {[
               { l: "Identity", v: 98 },
               { l: "Financial", v: 92 },
@@ -63,22 +79,19 @@ function Pipeline() {
               { l: "History", v: 95 },
             ].map((c) => (
               <div key={c.l}>
-                <div className="flex items-center justify-between text-xs mb-1">
+                <div className="mb-1 flex items-center justify-between text-xs">
                   <span>{c.l}</span>
-                  <span className="text-muted-foreground tabular-nums">{c.v}%</span>
+                  <span className="tabular-nums text-muted-foreground">{c.v}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-gradient-aurora" style={{ width: `${c.v}%` }} />
-                </div>
+                <ScoreBar value={c.v} />
               </div>
             ))}
-          </div>
-          <div className="mt-6 pt-5 border-t border-border/40">
-            <div className="text-xs text-muted-foreground">Composite</div>
-            <div className="text-3xl font-semibold tracking-tight text-gradient mt-1">89.6%</div>
-          </div>
-        </div>
+            <Separator className="my-2" />
+            <div className="text-xs text-muted-foreground">Overall score</div>
+            <div className="mt-1 text-3xl font-semibold tracking-tight text-gradient">89.6%</div>
+          </GlassCardContent>
+        </GlassCard>
       </div>
-    </div>
+    </AppPage>
   );
 }
