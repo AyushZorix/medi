@@ -9,6 +9,8 @@ import { Eye, EyeOff, Briefcase, User as UserIcon, Loader2, Sparkles } from "luc
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { motion } from "framer-motion";
+import { Spotlight } from "@/components/ui/spotlight";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -157,7 +159,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-lg border border-input dark:border-input/50 bg-background px-3 py-3 text-sm text-foreground shadow-sm shadow-black/5 transition-shadow placeholder:text-muted-foreground/70 focus-visible:bg-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-foreground shadow-sm shadow-black/5 transition-all placeholder:text-muted-foreground/50 focus-visible:bg-white/[0.05] focus-visible:border-[var(--landing-accent)] focus-visible:ring-1 focus-visible:ring-[var(--landing-accent)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         ref={ref}
@@ -223,10 +225,10 @@ function PortalPicker({
             disabled={disabled}
             onClick={() => onChange(opt.id)}
             className={cn(
-              "flex items-center justify-center gap-2 rounded-lg border border-input dark:border-input/50 px-3 py-2.5 text-sm font-medium transition-all cursor-pointer",
+              "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer",
               active
-                ? "border-[var(--landing-accent)] bg-white/10 text-white shadow-sm"
-                : "bg-background hover:bg-accent/50",
+                ? "border-[var(--landing-accent)] bg-white/10 text-white shadow-[0_0_15px_rgba(124,58,237,0.15)]"
+                : "border-white/5 bg-white/[0.02] text-muted-foreground hover:text-white hover:bg-white/[0.05]",
               disabled && "pointer-events-none opacity-50"
             )}
           >
@@ -262,11 +264,25 @@ function SignInForm({
 }) {
   return (
     <form onSubmit={onSubmit} autoComplete="on" className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-aurora">
-          <Sparkles className="size-5 text-primary-foreground" />
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.03)]">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[var(--landing-accent)]"
+          >
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+            <polyline points="12 22 12 12 22 8.5" />
+            <polyline points="2 8.5 12 12" />
+          </svg>
         </div>
-        <h1 className="text-2xl font-bold">Sign in to VisaIQ</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white mt-1">Sign in to VisaIQ</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Sign in to your ${portal === "attorney" ? "attorney" : "applicant"} portal`
@@ -342,11 +358,25 @@ function SignUpForm({
 }) {
   return (
     <form onSubmit={onSubmit} autoComplete="on" className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-aurora">
-          <Sparkles className="size-5 text-primary-foreground" />
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.03)]">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[var(--landing-accent)]"
+          >
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5" />
+            <polyline points="12 22 12 12 22 8.5" />
+            <polyline points="2 8.5 12 12" />
+          </svg>
         </div>
-        <h1 className="text-2xl font-bold">Create your account</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white mt-1">Create your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Create your ${portal === "attorney" ? "attorney" : "applicant"} account`
@@ -642,14 +672,25 @@ export function AuthUI({ portalLock, search }: AuthUIProps) {
   const portalLocked = Boolean(portalLock);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-transparent text-foreground relative z-10">
+    <div className="w-full min-h-screen flex items-center justify-center bg-transparent text-foreground relative z-10 overflow-hidden py-12 px-4">
+      {/* Background Spotlights */}
+      <Spotlight className="-top-40 left-0 md:left-20 md:-top-40" fill="var(--landing-accent)" />
+      <Spotlight className="top-40 left-10 md:left-60 md:top-20" fill="rgba(124,58,237,0.12)" />
+
       <style>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {
           display: none;
         }
       `}</style>
-      <div className="w-full max-w-[420px] px-6 py-8 md:px-8 md:py-10 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-xl shadow-glow relative z-10">
+      
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ scale: 1.005 }}
+        className="w-full max-w-[440px] px-8 py-10 rounded-2xl border border-white/[0.08] bg-black/60 backdrop-blur-2xl shadow-[0_0_50px_rgba(124,58,237,0.06)] relative z-10"
+      >
         <AuthFormContainer
           isSignIn={isSignIn}
           onToggle={toggleForm}
@@ -658,7 +699,7 @@ export function AuthUI({ portalLock, search }: AuthUIProps) {
           portalLocked={portalLocked}
           search={search}
         />
-      </div>
+      </motion.div>
     </div>
   );
 }

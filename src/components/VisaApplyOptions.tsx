@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 import { AttorneySelect } from "@/components/AttorneySelect";
+import { GlassCard } from "@/components/GlassCard";
 import {
   APPLICANT_VISA_OPTIONS,
   startApplication,
@@ -21,6 +22,9 @@ const icons: Record<ApplicantVisaChoice, typeof GraduationCap> = {
   "O-1": Star,
   "B-1/B-2": Plane,
 };
+
+const OCEAN_IMAGE =
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=80";
 
 function visaKey(visaType: string): ApplicantVisaChoice | null {
   if (visaType === "F-1" || visaType === "O-1" || visaType === "B-1/B-2") return visaType;
@@ -110,48 +114,50 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
           const started = existingTypes.has(opt.id);
           const isHovered = hoveredOption === opt.id;
           return (
-            <motion.button
+            <motion.div
               key={opt.id}
-              type="button"
-              disabled={mutation.isPending}
-              onClick={() => setSelected(opt.id)}
+              onClick={() => !mutation.isPending && setSelected(opt.id)}
               onMouseEnter={() => setHoveredOption(opt.id)}
               onMouseLeave={() => setHoveredOption(null)}
               whileHover={{ y: -4, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
-              className={cn(
-                "landing-card rounded-xl p-4 text-left transition-all duration-300",
-                active
-                  ? "border-[var(--landing-accent)]/50 bg-white/[0.08] shadow-glow"
-                  : "bg-white/[0.02] border-white/5 opacity-90 hover:opacity-100",
-              )}
+              className="cursor-pointer h-full"
             >
-              <div className="flex items-center justify-between gap-2">
-                <motion.div
-                  animate={{
-                    scale: isHovered ? 1.15 : 1,
-                    rotate: isHovered ? 8 : 0,
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  className={cn(
-                    "grid size-10 place-items-center rounded-lg transition-colors duration-300",
-                    active ? "bg-[var(--landing-accent)] text-[var(--landing-solid-bg)]" : "bg-muted",
-                  )}
-                >
-                  <Icon className="size-5" />
-                </motion.div>
-                {started && (
-                  <span className="rounded-full border border-[var(--landing-border)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Started
-                  </span>
+              <GlassCard
+                className={cn(
+                  "p-4 text-left transition-all duration-300 h-full",
+                  active
+                    ? "border-[var(--landing-accent)]/50 bg-white/[0.08] shadow-glow"
+                    : "bg-white/[0.02] border-white/5 opacity-90 hover:opacity-100",
                 )}
-              </div>
-              <p className="mt-3 text-sm font-medium">
-                {opt.title}
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{opt.description}</p>
-            </motion.button>
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <motion.div
+                    animate={{
+                      scale: isHovered ? 1.15 : 1,
+                      rotate: isHovered ? 8 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    className={cn(
+                      "grid size-10 place-items-center rounded-lg transition-colors duration-300",
+                      active ? "bg-[var(--landing-accent)] text-[var(--landing-solid-bg)]" : "bg-muted",
+                    )}
+                  >
+                    <Icon className="size-5" />
+                  </motion.div>
+                  {started && (
+                    <span className="rounded-full border border-[var(--landing-border)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Started
+                    </span>
+                  )}
+                </div>
+                <p className="mt-3 text-sm font-medium">
+                  {opt.title}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{opt.description}</p>
+              </GlassCard>
+            </motion.div>
           );
         })}
       </div>

@@ -8,6 +8,7 @@ import { ApplicantApplicationCard } from "@/components/ApplicantApplicationCard"
 import { VisaApplyOptions } from "@/components/VisaApplyOptions";
 import { getMyApplications } from "@/lib/applications";
 import { PageHeader } from "@/components/PageHeader";
+import { GlassCard } from "@/components/GlassCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -111,17 +112,19 @@ function ApplicantDashboard() {
           </motion.section>
         )}
 
-        <motion.section variants={itemVariants} className="landing-card rounded-2xl p-6">
-          <VisaApplyOptions
-            existingApplications={applications}
-            onStarted={(app) => {
-              void navigate({
-                to: "/portal/documents",
-                search: { slug: app.slug },
-              });
-            }}
-          />
-        </motion.section>
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <VisaApplyOptions
+              existingApplications={applications}
+              onStarted={(app) => {
+                void navigate({
+                  to: "/portal/documents",
+                  search: { slug: app.slug },
+                });
+              }}
+            />
+          </GlassCard>
+        </motion.div>
       </motion.div>
     </AppPage>
   );
