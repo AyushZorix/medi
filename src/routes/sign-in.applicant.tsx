@@ -25,7 +25,7 @@ export const Route = createFileRoute("/sign-in/applicant")({
 function ApplicantSignInPage() {
   const search = Route.useSearch();
   return (
-    <LandingLayout shader={true} className="p-0 m-0 w-full min-h-screen">
+    <LandingLayout shader={false} ocean={true} className="p-0 m-0 w-full min-h-screen">
       <AuthUI search={search} portalLock="applicant" />
     </LandingLayout>
   );
