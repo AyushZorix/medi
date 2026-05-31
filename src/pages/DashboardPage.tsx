@@ -1,4 +1,5 @@
-import { ExternalLink, FileUp, FileWarning, Scale, Users } from "lucide-react";
+import { ExternalLink, FileSearch, FileUp, FileWarning, Scale, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const stats = [
   { label: "Cases Today", value: "12", icon: Scale },
@@ -44,14 +45,13 @@ export function DashboardPage() {
 
       <section className="card-grid two">
         <article className="card upload">
-          <h2>Upload Documents</h2>
-          <p>Drag and drop passport scans, financial proofs, affidavits, and supporting files.</p>
-          <label className="upload-box" htmlFor="docs-upload">
-            <FileUp size={18} />
-            <span>Choose files or drop here</span>
-            <input id="docs-upload" type="file" multiple />
-          </label>
-          <small>Supported: PDF, JPG, PNG, DOCX</small>
+          <h2>Document OCR</h2>
+          <p>Open the OCR workspace to auto-rotate scans and extract text for downstream review.</p>
+          <Link to="/app/documents" className="btn action cta-link">
+            <FileSearch size={18} />
+            Open OCR workspace
+          </Link>
+          <small>Image scans work best. PDFs and DOCX should be converted before OCR.</small>
         </article>
 
         <article className="card">
