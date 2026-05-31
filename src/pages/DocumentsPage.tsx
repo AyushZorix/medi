@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from "react";
-import { AlertTriangle, CheckCircle2, Copy, FileText, FileUp, RefreshCcw, RotateCw } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Copy, Download, FileText, FileUp, RefreshCcw, RotateCw } from "lucide-react";
 import { analyzeDocumentOcr, type OcrAnalysisResult } from "../utils/documentOcr";
 
 function formatScore(value: number) {
@@ -60,6 +60,19 @@ export function DocumentsPage() {
     await navigator.clipboard.writeText(text);
     setCopied(true);
     globalThis.setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleDownloadCorrectedImage = () => {
+    const imageUrl = analysis?.bestRotation.imageUrl;
+
+    if (!imageUrl) {
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.download = `upright-document-${analysis.bestRotation.angle}.jpg`;
+    link.click();
   };
 
   return (
@@ -153,10 +166,16 @@ export function DocumentsPage() {
 
               <div className="ocr-text-toolbar">
                 <h3>Recognized Text</h3>
-                <button className="btn ghost-dark" type="button" onClick={handleCopyText} disabled={!analysis.bestRotation.text}>
-                  <Copy size={16} />
-                  {copied ? "Copied" : "Copy text"}
-                </button>
+                <div className="ocr-toolbar-actions">
+                  <button className="btn ghost-dark" type="button" onClick={handleDownloadCorrectedImage}>
+                    <Download size={16} />
+                    Download image
+                  </button>
+                  <button className="btn ghost-dark" type="button" onClick={handleCopyText} disabled={!analysis.bestRotation.text}>
+                    <Copy size={16} />
+                    {copied ? "Copied" : "Copy text"}
+                  </button>
+                </div>
               </div>
 
               <pre className="ocr-text-block">{analysis.bestRotation.text || "No readable text was detected."}</pre>
