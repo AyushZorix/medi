@@ -85,26 +85,26 @@ function ApplicantDashboard() {
 
         {needsAction && (
           <motion.div variants={itemVariants}>
-            <Alert className="border-warning/40 bg-warning/10">
+            <Alert className="glass border-warning/25 bg-warning/[0.03] text-warning-foreground shadow-[0_0_20px_rgba(245,158,11,0.03)]">
               <AlertTriangle className="size-4 text-warning" />
-              <AlertTitle>Action required</AlertTitle>
-              <AlertDescription>
-                One or more applications need additional documents. Open the case below to see what is missing.
+              <AlertTitle className="font-semibold tracking-wide">Action required</AlertTitle>
+              <AlertDescription className="text-xs text-muted-foreground/90 font-light mt-1">
+                One or more visa application cases require additional document uploads. Open the case below to submit outstanding items.
               </AlertDescription>
             </Alert>
           </motion.div>
         )}
 
         {isLoading && (
-          <motion.p variants={itemVariants} className="text-sm text-muted-foreground">
-            Loading your applications…
+          <motion.p variants={itemVariants} className="text-sm text-muted-foreground/80 font-light">
+            Syncing application data with MongoDB...
           </motion.p>
         )}
 
         {!isLoading && applications.length > 0 && (
           <motion.section variants={itemVariants} className="space-y-4">
-            <h2 className="text-lg font-medium tracking-tight">Your applications</h2>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <h2 className="text-lg font-bold tracking-tight text-gradient bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent select-none pl-1">Your cases</h2>
+            <div className="grid gap-5 lg:grid-cols-2">
               {applications.map((app) => (
                 <ApplicantApplicationCard key={app.id} application={app} />
               ))}
@@ -113,7 +113,7 @@ function ApplicantDashboard() {
         )}
 
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-6">
+          <GlassCard className="p-6 border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
             <VisaApplyOptions
               existingApplications={applications}
               onStarted={(app) => {

@@ -346,6 +346,8 @@ function SignUpForm({
   setPassword,
   portal,
   setPortal,
+  attorneyVisaTypes,
+  setAttorneyVisaTypes,
   portalLocked,
 }: {
   onSubmit: (e: React.FormEvent) => void;
@@ -358,8 +360,20 @@ function SignUpForm({
   setPassword: (val: string) => void;
   portal: PortalKind;
   setPortal: (val: PortalKind) => void;
+  attorneyVisaTypes: string[];
+  setAttorneyVisaTypes: (next: string[]) => void;
   portalLocked: boolean;
 }) {
+  const visaOptions = ["F-1", "O-1", "B-1/B-2"];
+
+  const toggleVisaType = (visa: string) => {
+    setAttorneyVisaTypes(
+      attorneyVisaTypes.includes(visa)
+        ? attorneyVisaTypes.filter((v) => v !== visa)
+        : [...attorneyVisaTypes, visa],
+    );
+  };
+
   return (
     <form onSubmit={onSubmit} autoComplete="on" className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
@@ -434,6 +448,36 @@ function SignUpForm({
             disabled={loading}
           />
         </div>
+        {portal === "attorney" && (
+          <div className="grid gap-2">
+            <Label>Visa specializations</Label>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {visaOptions.map((visa) => {
+                const active = attorneyVisaTypes.includes(visa);
+                return (
+                  <button
+                    key={visa}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => toggleVisaType(visa)}
+                    className={cn(
+                      "rounded-lg border px-3 py-2 text-xs font-medium transition-all",
+                      active
+                        ? "border-[var(--landing-accent)] bg-white/10 text-white"
+                        : "border-white/10 bg-white/[0.02] text-muted-foreground hover:text-white",
+                      loading && "pointer-events-none opacity-50",
+                    )}
+                  >
+                    {visa}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Select at least one visa type you specialize in.
+            </p>
+          </div>
+        )}
         <Button 
           type="submit" 
           className="mt-2 w-full h-11 bg-gradient-to-r from-[oklch(0.76_0.15_262)] to-[oklch(0.65_0.15_275)] text-white font-medium shadow-[0_4px_20px_rgba(124,58,237,0.2)] hover:shadow-[0_4px_30px_rgba(124,58,237,0.35)] transition-all duration-300 border-none active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2" 
@@ -470,6 +514,7 @@ function AuthFormContainer({
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleBtnLoaded, setGoogleBtnLoaded] = useState(false);
+  const [attorneyVisaTypes, setAttorneyVisaTypes] = useState<string[]>(["F-1", "O-1", "B-1/B-2"]);
 
   useEffect(() => {
     // Check if the script is already loaded
@@ -491,8 +536,10 @@ function AuthFormContainer({
 
     function initGoogleBtn() {
       if ((window as any).google) {
+        const rawClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || "984146651145-dega19k07fismgo5r7eb69lni68jcfo1.apps.googleusercontent.com";
+        const cleanClientId = rawClientId.replace(/^['"]|['"]$/g, "");
         (window as any).google.accounts.id.initialize({
-          client_id: "984146651145-dega19k07fismgo5r7eb69lni68jcfo1.apps.googleusercontent.com",
+          client_id: cleanClientId,
           callback: (response: any) => {
             handleGoogleSignIn(response.credential);
           },
@@ -517,6 +564,16 @@ function AuthFormContainer({
     }
   }, [googleBtnLoaded, isSignIn, portal]);
 
+  async function safeParseJson<T>(response: Response): Promise<T> {
+    const text = await response.text();
+    if (!text) return {} as T;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return { message: text } as unknown as T;
+    }
+  }
+
   async function handleGoogleSignIn(idToken: string) {
     if (loading) return;
     setLoading(true);
@@ -525,15 +582,19 @@ function AuthFormContainer({
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: idToken, role }),
+        body: JSON.stringify({
+          token: idToken,
+          role,
+          attorneyVisaTypes: role === "attorney" ? attorneyVisaTypes : undefined,
+        }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await safeParseJson<{ message?: string }>(res);
         throw new Error(errorData.message || "Google Sign-In failed");
       }
 
-      const data = await res.json(); // { user }
+      const data = await safeParseJson<{ user: User }>(res); // { user }
       toast.success("Welcome!");
       await refreshSession();
       await redirectAfterAuth(data.user);
@@ -579,12 +640,16 @@ function AuthFormContainer({
       if (!isSignIn) {
         if (!fullName.trim()) throw new Error("Please enter your full name");
         if (password.length < 6) throw new Error("Password must be at least 6 characters");
+        if (portal === "attorney" && attorneyVisaTypes.length === 0) {
+          throw new Error("Select at least one visa specialization");
+        }
 
         const user = await signUp({
           email: email.trim(),
           password,
           fullName: fullName.trim(),
           role: portalToRole(portal),
+          attorneyVisaTypes: portal === "attorney" ? attorneyVisaTypes : undefined,
         });
         toast.success("Welcome to VisaIQ");
         await refreshSession();
@@ -629,6 +694,8 @@ function AuthFormContainer({
           setPassword={setPassword}
           portal={portal}
           setPortal={setPortal}
+          attorneyVisaTypes={attorneyVisaTypes}
+          setAttorneyVisaTypes={setAttorneyVisaTypes}
           portalLocked={portalLocked}
         />
       )}

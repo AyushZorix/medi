@@ -77,6 +77,8 @@ export type Application = {
   attorneyUserId: string | null;
   attorneyName: string | null;
   forwardedToAttorney: boolean;
+  submittedToAttorney: boolean;
+  submittedAt: string | null;
 };
 
 export const APPLICANT_VISA_OPTIONS: {
@@ -183,13 +185,19 @@ export function normalizeApplication(raw: Partial<Application> & Record<string, 
     attorneyUserId: raw.attorneyUserId ? String(raw.attorneyUserId) : null,
     attorneyName: raw.attorneyName ? String(raw.attorneyName) : null,
     forwardedToAttorney: Boolean(raw.forwardedToAttorney ?? raw.attorneyUserId),
+    submittedToAttorney: Boolean(raw.submittedToAttorney),
+    submittedAt: raw.submittedAt ? String(raw.submittedAt) : null,
   };
 }
 
 async function parseJson<T>(res: Response): Promise<T> {
   const text = await res.text();
   if (!text) return {} as T;
-  return JSON.parse(text) as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return { message: text } as unknown as T;
+  }
 }
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -247,7 +255,7 @@ export async function getApplicationBySlug(slug: string): Promise<Application> {
 
 export async function uploadDocument(
   slug: string,
-  payload: { docId: string; fileName: string; notes?: string },
+  payload: { docId: string; fileName: string; notes?: string; extractedText?: string },
 ): Promise<Application> {
   const data = await apiRequest<{ application: Application }>(`/applications/${slug}/documents`, {
     method: "POST",
@@ -258,6 +266,14 @@ export async function uploadDocument(
 
 export async function runPipeline(slug: string): Promise<Application> {
   const data = await apiRequest<{ application: Application }>(`/applications/${slug}/pipeline/run`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  return normalizeApplication(data.application);
+}
+
+export async function submitApplicationToAttorney(slug: string): Promise<Application> {
+  const data = await apiRequest<{ application: Application }>(`/applications/${slug}/submit`, {
     method: "POST",
     body: JSON.stringify({}),
   });
@@ -280,6 +296,25 @@ export async function submitHumanReview(
     call: data.call,
   };
 }
+
+export async function triggerOutboundCall(
+  slug: string,
+  script: string,
+  phoneNumber?: string,
+): Promise<{ application: Application; call: Record<string, unknown> }> {
+  const data = await apiRequest<{
+    application: Application;
+    call: Record<string, unknown>;
+  }>(`/applications/${slug}/call`, {
+    method: "POST",
+    body: JSON.stringify({ script, phoneNumber }),
+  });
+  return {
+    application: normalizeApplication(data.application),
+    call: data.call,
+  };
+}
+
 
 export function progressSteps(app: Application) {
   const progress = app.progress ?? EMPTY_PROGRESS;

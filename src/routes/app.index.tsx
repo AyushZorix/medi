@@ -48,7 +48,7 @@ const itemVariants = {
 
 export function Dashboard() {
   const [hoveredFeedId, setHoveredFeedId] = useState<string | null>(null);
-  const { displayName } = useAuth();
+  const { displayName, user } = useAuth();
   const firstName = displayName.split(/\s+/)[0] ?? displayName;
   const { data: applications = [], isLoading } = useQuery({
     queryKey: ["applications"],
@@ -71,6 +71,20 @@ export function Dashboard() {
     { label: "Avg AI score", value: avgScore, hint: "Across active cases", icon: Brain, iconClassName: "text-violet" },
   ];
 
+  const totalApps = applications.length;
+  const docsReceivedAvg = totalApps > 0 ? Math.round(applications.reduce((sum, a) => sum + (a.progress?.documentsReceived ?? 0), 0) / totalApps) : 0;
+  const idVerificationAvg = totalApps > 0 ? Math.round(applications.reduce((sum, a) => sum + (a.progress?.identityVerification ?? 0), 0) / totalApps) : 0;
+  const financialReviewAvg = totalApps > 0 ? Math.round(applications.reduce((sum, a) => sum + (a.progress?.financialReview ?? 0), 0) / totalApps) : 0;
+  const finalDecisionAvg = totalApps > 0 ? Math.round(applications.reduce((sum, a) => sum + (a.progress?.finalDecision ?? 0), 0) / totalApps) : 0;
+
+  const processingSteps = [
+    { label: "Extract documents", val: docsReceivedAvg, status: docsReceivedAvg === 100 ? "Done" : docsReceivedAvg > 0 ? "In progress" : "Waiting" },
+    { label: "Check completeness", val: docsReceivedAvg, status: docsReceivedAvg === 100 ? "Done" : docsReceivedAvg > 0 ? "In progress" : "Waiting" },
+    { label: "Verify consistency (AI)", val: financialReviewAvg, status: financialReviewAvg === 100 ? "Done" : financialReviewAvg > 0 ? "In progress" : "Waiting" },
+    { label: "Validate rules (AI)", val: idVerificationAvg, status: idVerificationAvg === 100 ? "Done" : idVerificationAvg > 0 ? "In progress" : "Waiting" },
+    { label: "Prepare decision", val: finalDecisionAvg, status: finalDecisionAvg === 100 ? "Done" : finalDecisionAvg > 0 ? "In progress" : "Waiting" },
+  ];
+
   const feed = applications.slice(0, 6);
 
   return (
@@ -86,7 +100,11 @@ export function Dashboard() {
             portal="attorney"
             eyebrow="Command center"
             title={`Good morning, ${firstName}`}
-            description={`${needsReview} application${needsReview === 1 ? "" : "s"} waiting for review across F-1, O-1, and B visas.`}
+            description={
+              user?.attorneyVisaTypes?.length
+                ? `Specializing in ${user.attorneyVisaTypes.join(", ")} | ${needsReview} case${needsReview === 1 ? "" : "s"} waiting for review.`
+                : `${needsReview} application${needsReview === 1 ? "" : "s"} waiting for review across F-1, O-1, and B visas.`
+            }
             actions={
               <Button
                 variant="gradient"
@@ -105,12 +123,12 @@ export function Dashboard() {
 
         {needsReview > 0 && (
           <motion.div variants={itemVariants}>
-            <Alert className="border-warning/40 bg-warning/10">
-              <AlertTitle>
-                {needsReview} case{needsReview === 1 ? "" : "s"} need your review
+            <Alert className="glass border-warning/25 bg-warning/[0.03] text-warning-foreground shadow-[0_0_20px_rgba(245,158,11,0.03)]">
+              <AlertTitle className="font-semibold tracking-wide">
+                {needsReview} case{needsReview === 1 ? "" : "s"} require attorney review
               </AlertTitle>
-              <AlertDescription>
-                Open the applications queue to review processing and document requests.
+              <AlertDescription className="text-xs text-muted-foreground/90 font-light mt-1">
+                Open the applications queue to review documents, process details, and execute the AI pipeline check.
               </AlertDescription>
             </Alert>
           </motion.div>
@@ -127,28 +145,28 @@ export function Dashboard() {
           ))}
         </motion.div>
 
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <GlassCard className="h-full">
-              <GlassCardHeader>
+            <GlassCard className="h-full border-white/[0.04]">
+              <GlassCardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <GlassCardTitle>Recent activity</GlassCardTitle>
-                    <GlassCardDescription>Latest applications and decisions</GlassCardDescription>
+                    <GlassCardTitle className="text-lg font-bold">Recent cases</GlassCardTitle>
+                    <GlassCardDescription className="text-xs font-light">Latest applications and pipeline reviews</GlassCardDescription>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="size-1.5 rounded-full bg-success animate-pulse" />
-                    Live updates
+                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 bg-white/[0.02] border border-white/[0.05] rounded-full px-2.5 py-1">
+                    <span className="size-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--color-success)]" />
+                    Live pipeline
                   </div>
                 </div>
               </GlassCardHeader>
               <GlassCardContent className="pt-0">
-                <div className="divide-y divide-border/40">
+                <div className="space-y-1">
                   {isLoading && (
-                    <p className="py-6 text-center text-sm text-muted-foreground">Loading applications…</p>
+                    <p className="py-8 text-center text-sm text-muted-foreground">Loading applications…</p>
                   )}
                   {!isLoading && feed.length === 0 && (
-                    <p className="py-6 text-center text-sm text-muted-foreground">No applications yet.</p>
+                    <p className="py-8 text-center text-sm text-muted-foreground">No applications in queue yet.</p>
                   )}
                   {feed.map((f) => (
                     <motion.div
@@ -162,22 +180,22 @@ export function Dashboard() {
                       <Link
                         to="/app/applications/$id"
                         params={{ id: f.slug }}
-                        className="-mx-2 flex items-center gap-4 rounded-lg px-2 py-3 bg-transparent hover:bg-white/[0.03] transition-colors duration-200"
+                        className="-mx-2 flex items-center gap-4 rounded-xl px-3 py-3 bg-transparent hover:bg-white/[0.02] border border-transparent hover:border-white/[0.04] transition-all duration-200"
                       >
-                        <Avatar className="size-9">
-                          <AvatarFallback className="bg-gradient-primary text-xs font-medium text-primary-foreground">
+                        <Avatar className="size-9 border border-white/[0.08]">
+                          <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
                             {f.applicantName.split(" ").map((n) => n[0]).join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium">
+                          <div className="truncate text-sm font-medium tracking-tight">
                             {f.applicantName}
                           </div>
-                          <div className="text-xs text-muted-foreground">Updated {f.updated}</div>
+                          <div className="text-[11px] text-muted-foreground/80 font-light mt-0.5">Updated {f.updated}</div>
                         </div>
                         <VisaBadge type={f.visaType} />
-                        <div className="hidden w-24 sm:block">
-                          <div className="mb-1 text-[10px] text-muted-foreground">AI {f.score}%</div>
+                        <div className="hidden w-24 sm:block select-none">
+                          <div className="mb-1 text-[10px] text-muted-foreground font-light">Confidence {f.score}%</div>
                           <ScoreBar value={f.score} />
                         </div>
                         <StatusBadge status={f.status} />
@@ -190,25 +208,19 @@ export function Dashboard() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <GlassCard className="h-full">
-              <GlassCardHeader>
+            <GlassCard className="h-full border-white/[0.04]">
+              <GlassCardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <GlassCardTitle>Processing status</GlassCardTitle>
-                  <Activity className="size-4 text-primary" />
+                  <GlassCardTitle className="text-base font-bold">Pipeline analytics</GlassCardTitle>
+                  <Activity className="size-4 text-primary animate-pulse" />
                 </div>
               </GlassCardHeader>
-              <GlassCardContent className="space-y-4 pt-0">
-                {[
-                  { label: "Extract documents", val: 100, status: "Done" },
-                  { label: "Check completeness", val: 100, status: "Done" },
-                  { label: "Verify consistency", val: 72, status: "In progress" },
-                  { label: "Validate rules", val: 0, status: "Waiting" },
-                  { label: "Prepare decision", val: 0, status: "Waiting" },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <div className="mb-1.5 flex items-center justify-between text-xs">
+              <GlassCardContent className="space-y-4.5 pt-0">
+                {processingSteps.map((s) => (
+                  <div key={s.label} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs font-light">
                       <span>{s.label}</span>
-                      <span className="text-muted-foreground">{s.status}</span>
+                      <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">{s.status}</span>
                     </div>
                     <ScoreBar
                       value={s.val}
@@ -216,11 +228,13 @@ export function Dashboard() {
                     />
                   </div>
                 ))}
-                <Separator className="my-2" />
-                <div className="text-xs text-muted-foreground">AI confidence score</div>
+                <Separator className="bg-white/[0.05] my-2" />
+                <div className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground select-none">AI Confidence rating</div>
                 <div className="flex items-baseline gap-2">
-                  <div className="text-3xl font-semibold tracking-tight text-gradient">88.4%</div>
-                  <div className="text-xs text-success">4.2% above average</div>
+                  <div className="text-3xl font-bold tracking-tight text-gradient">{avgScore}</div>
+                  <div className="text-[10px] text-success font-medium bg-success/10 border border-success/20 px-2 py-0.5 rounded-full">
+                    Average Score
+                  </div>
                 </div>
               </GlassCardContent>
             </GlassCard>

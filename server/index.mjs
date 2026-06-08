@@ -15,6 +15,8 @@ import {
   maybeAutoRunPipeline,
   runPipelineForApplication,
   submitHumanReview,
+  notifyApplicantByPhone,
+  triggerApplicantCall,
 } from "./applicationService.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -63,6 +65,10 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use((req, res, next) => {
+  console.log(`[Express API] ${req.method} ${req.url}`);
+  next();
+});
 app.use("/uploads/calls", express.static(path.join(__dirname, "uploads", "calls")));
 
 const userSchema = new mongoose.Schema(
@@ -73,6 +79,10 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["attorney", "user"], default: "user" },
     attorneyVerified: { type: Boolean, default: false },
     attorneySpecialty: { type: String, trim: true, default: "" },
+    attorneyVisaTypes: {
+      type: [String],
+      default: [],
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { versionKey: false },
@@ -144,6 +154,8 @@ const applicationSchema = new mongoose.Schema(
     callLog: [{ type: mongoose.Schema.Types.Mixed }],
     applicantUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     attorneyUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    submittedToAttorney: { type: Boolean, default: false },
+    submittedAt: { type: Date, default: null },
   },
   { versionKey: false, timestamps: true },
 );
@@ -157,6 +169,7 @@ applicationSchema.index(
 );
 
 const APPLICANT_VISA_TYPES = ["F-1", "O-1", "B-1/B-2"];
+const ATTORNEY_VISA_TYPES = ["F-1", "O-1", "B-1/B-2"];
 
 const Application = mongoose.model("Application", applicationSchema);
 
@@ -202,6 +215,7 @@ function toUserResponse(user) {
     email: user.email,
     fullName: user.fullName,
     role: user.role,
+    attorneyVisaTypes: user.role === "attorney" ? (user.attorneyVisaTypes || []) : [],
   };
 }
 
@@ -214,6 +228,19 @@ function attorneyFromRef(attorneyRef) {
     };
   }
   return { attorneyUserId: String(attorneyRef), attorneyName: null };
+}
+
+function normalizeAttorneyVisaType(visaType) {
+  if (visaType === "B-1" || visaType === "B-2") return "B-1/B-2";
+  return ATTORNEY_VISA_TYPES.includes(visaType) ? visaType : null;
+}
+
+function normalizeAttorneyVisaTypes(input) {
+  if (!Array.isArray(input)) return [];
+  const normalized = input
+    .map((t) => normalizeAttorneyVisaType(String(t)))
+    .filter(Boolean);
+  return Array.from(new Set(normalized));
 }
 
 function toApplicationResponse(app) {
@@ -239,24 +266,34 @@ async function resolveVerifiedAttorney(attorneyUserId) {
 
 async function seedVerifiedAttorneysIfEmpty() {
   const count = await User.countDocuments({ role: "attorney", attorneyVerified: true });
-  if (count > 0) return;
+  const hasBalla = await User.findOne({ email: "balla@visaiq.demo" });
+  if (count > 0 && hasBalla) return;
 
   const passwordHash = await bcrypt.hash("attorney123", 10);
   const attorneys = [
     {
+      email: "balla@visaiq.demo",
+      fullName: "Balla",
+      attorneySpecialty: "O-1 & tech visas",
+      attorneyVisaTypes: ["O-1"],
+    },
+    {
       email: "jordan.davis@visaiq.demo",
       fullName: "Jordan Davis",
       attorneySpecialty: "F-1 & O-1 visas",
+      attorneyVisaTypes: ["F-1", "O-1"],
     },
     {
       email: "hannah.jones@visaiq.demo",
       fullName: "Hannah Jones",
       attorneySpecialty: "B-1/B-2 & family immigration",
+      attorneyVisaTypes: ["B-1/B-2"],
     },
     {
       email: "priya.iyer@visaiq.demo",
       fullName: "Priya Iyer",
       attorneySpecialty: "Employment-based visas",
+      attorneyVisaTypes: ["O-1", "F-1"],
     },
   ];
 
@@ -269,6 +306,7 @@ async function seedVerifiedAttorneysIfEmpty() {
           role: "attorney",
           attorneyVerified: true,
           attorneySpecialty: a.attorneySpecialty,
+          attorneyVisaTypes: a.attorneyVisaTypes,
           passwordHash,
         },
       },
@@ -300,10 +338,37 @@ function slugForApplicant(user, visaType) {
   return `${base}-${visa}-${user._id.toString().slice(-6)}`;
 }
 
+function findApplicationQuery(slugOrId) {
+  return mongoose.Types.ObjectId.isValid(slugOrId)
+    ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] }
+    : { slug: slugOrId };
+}
+
 async function createApplicantApplication(user, visaType, phoneNumber, attorneyUserId) {
   const documents = buildDocumentChecklist(visaType, []);
 
-  return Application.create({
+  // Copy matching uploaded documents from user's other applications
+  try {
+    const otherApps = await Application.find({ applicantUserId: user._id });
+    for (const otherApp of otherApps) {
+      for (const otherDoc of otherApp.documents) {
+        if (otherDoc.fileName && otherDoc.status !== "missing") {
+          const match = documents.find(d => d.docId === otherDoc.docId);
+          if (match && !match.fileName) {
+            match.fileName = otherDoc.fileName;
+            match.notes = otherDoc.notes;
+            match.extractedText = otherDoc.extractedText;
+            match.status = otherDoc.status;
+            match.uploadedAt = otherDoc.uploadedAt;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Failed to copy documents from other applications:", err);
+  }
+
+  const appObj = await Application.create({
     slug: slugForApplicant(user, visaType),
     applicantName: user.fullName,
     visaType,
@@ -324,6 +389,10 @@ async function createApplicantApplication(user, visaType, phoneNumber, attorneyU
     callLog: [],
     applicantUserId: user._id,
   });
+
+  // Sync application progress to reflect copied documents in the overall progress score
+  await syncApplicationProgress(appObj);
+  return appObj;
 }
 
 async function getUserFromRequest(req) {
@@ -332,11 +401,17 @@ async function getUserFromRequest(req) {
   try {
     if (AUTH_MODE === "jwt") {
       const payload = jwt.verify(token, JWT_SECRET);
-      const user = await User.findById(payload.sub);
+      if (payload && payload.sub && mongoose.Types.ObjectId.isValid(payload.sub)) {
+        const user = await User.findById(payload.sub);
+        return user || null;
+      }
+      return null;
+    }
+    if (mongoose.Types.ObjectId.isValid(token)) {
+      const user = await User.findById(token);
       return user || null;
     }
-    const user = await User.findById(token);
-    return user || null;
+    return null;
   } catch {
     return null;
   }
@@ -348,10 +423,11 @@ app.get("/api/health", (_req, res) => {
 
 app.post("/api/auth/signup", async (req, res) => {
   try {
-    const { email, password, fullName, role } = req.body || {};
+    const { email, password, fullName, role, attorneyVisaTypes } = req.body || {};
     const safeEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
     const safeName = typeof fullName === "string" ? fullName.trim() : "";
     const safeRole = role === "attorney" || role === "user" ? role : "user";
+    const normalizedVisaTypes = normalizeAttorneyVisaTypes(attorneyVisaTypes);
 
     if (!safeEmail || !password || !safeName) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -371,7 +447,10 @@ app.post("/api/auth/signup", async (req, res) => {
       passwordHash,
       fullName: safeName,
       role: safeRole,
-      attorneyVerified: false,
+      attorneyVerified: safeRole === "attorney",
+      attorneyVisaTypes: safeRole === "attorney"
+        ? (normalizedVisaTypes.length ? normalizedVisaTypes : ATTORNEY_VISA_TYPES)
+        : [],
     });
 
     const token = signToken(user._id.toString());
@@ -418,7 +497,7 @@ app.post("/api/auth/signin", async (req, res) => {
 
 app.post("/api/auth/google", async (req, res) => {
   try {
-    const { token: googleToken, role } = req.body || {};
+    const { token: googleToken, role, attorneyVisaTypes } = req.body || {};
     if (!googleToken) {
       return res.status(400).json({ message: "Google token is required" });
     }
@@ -431,9 +510,10 @@ app.post("/api/auth/google", async (req, res) => {
 
     const payload = await googleRes.json();
     
-    // Validate client ID to prevent spoofing
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID || "984146651145-dega19k07fismgo5r7eb69lni68jcfo1.apps.googleusercontent.com";
-    if (payload.aud !== expectedClientId) {
+    // Validate client ID to prevent spoofing (strip single or double quotes if any)
+    const expectedClientId = (process.env.GOOGLE_CLIENT_ID || "984146651145-dega19k07fismgo5r7eb69lni68jcfo1.apps.googleusercontent.com").replace(/^['"]|['"]$/g, "");
+    const aud = String(payload.aud || "").replace(/^['"]|['"]$/g, "");
+    if (aud !== expectedClientId) {
       return res.status(401).json({ message: "Unauthorized client application" });
     }
 
@@ -448,6 +528,7 @@ app.post("/api/auth/google", async (req, res) => {
     if (!user) {
       // Register new user
       const safeRole = role === "attorney" || role === "user" ? role : "user";
+      const normalizedVisaTypes = normalizeAttorneyVisaTypes(attorneyVisaTypes);
       
       // Generate a random password hash since passwordHash is required
       const dummyPassword = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
@@ -458,7 +539,10 @@ app.post("/api/auth/google", async (req, res) => {
         passwordHash,
         fullName,
         role: safeRole,
-        attorneyVerified: false,
+        attorneyVerified: safeRole === "attorney",
+        attorneyVisaTypes: safeRole === "attorney"
+          ? (normalizedVisaTypes.length ? normalizedVisaTypes : ATTORNEY_VISA_TYPES)
+          : [],
       });
     }
 
@@ -492,8 +576,22 @@ app.get("/api/attorneys", async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const attorneys = await User.find({ role: "attorney", attorneyVerified: true })
-      .select("fullName attorneySpecialty")
+    const { search, visaType } = req.query;
+    const query = { role: "attorney", attorneyVerified: true };
+    const normalizedVisa = normalizeAttorneyVisaType(String(visaType || "").trim());
+    if (normalizedVisa) {
+      query.attorneyVisaTypes = normalizedVisa;
+    }
+    if (search) {
+      const escapedSearch = String(search).replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+      query.$or = [
+        { fullName: { $regex: escapedSearch, $options: "i" } },
+        { attorneySpecialty: { $regex: escapedSearch, $options: "i" } }
+      ];
+    }
+
+    const attorneys = await User.find(query)
+      .select("fullName attorneySpecialty attorneyVisaTypes")
       .sort({ fullName: 1 });
 
     return res.json({
@@ -501,6 +599,9 @@ app.get("/api/attorneys", async (req, res) => {
         id: a._id.toString(),
         fullName: a.fullName,
         specialty: a.attorneySpecialty || "Immigration law",
+        visaTypes: Array.isArray(a.attorneyVisaTypes) && a.attorneyVisaTypes.length
+          ? a.attorneyVisaTypes
+          : ATTORNEY_VISA_TYPES,
       })),
     });
   } catch (error) {
@@ -580,18 +681,65 @@ app.post("/api/applications/start", async (req, res) => {
     }).populate("attorneyUserId", "fullName");
 
     if (existing) {
-      if (!existing.phoneNumber && phone) {
+      const oldPhone = existing.phoneNumber;
+      if (phone) {
         existing.phoneNumber = phone;
       }
-      if (!existing.attorneyUserId && attorneyUserId) {
+      if (attorneyUserId) {
         const attorney = await resolveVerifiedAttorney(attorneyUserId);
         if (!attorney) {
           return res.status(400).json({ message: "Select a valid verified attorney" });
         }
         existing.attorneyUserId = attorney._id;
+        existing.submittedToAttorney = true;
+        existing.submittedAt = new Date();
+        existing.status = "processing";
       }
+
+      // Copy matching uploaded documents from user's other applications if missing here
+      try {
+        const otherApps = await Application.find({
+          applicantUserId: user._id,
+          _id: { $ne: existing._id }
+        });
+        const updatedDocs = [...existing.documents];
+        let modified = false;
+        for (const otherApp of otherApps) {
+          for (const otherDoc of otherApp.documents) {
+            if (otherDoc.fileName && otherDoc.status !== "missing") {
+              const match = updatedDocs.find(d => d.docId === otherDoc.docId);
+              if (match && (!match.fileName || match.status === "missing")) {
+                match.fileName = otherDoc.fileName;
+                match.notes = otherDoc.notes;
+                match.extractedText = otherDoc.extractedText;
+                match.status = otherDoc.status;
+                match.uploadedAt = otherDoc.uploadedAt;
+                modified = true;
+              }
+            }
+          }
+        }
+        if (modified) {
+          existing.documents = updatedDocs;
+        }
+      } catch (err) {
+        console.error("Failed to copy documents to existing application:", err);
+      }
+
       await existing.save();
+      await syncApplicationProgress(existing);
       await existing.populate("attorneyUserId", "fullName");
+
+      if (phone && oldPhone !== phone) {
+        try {
+          const callResult = await notifyApplicantByPhone(existing, "started");
+          existing.callLog = [...(existing.callLog || []), callResult];
+          await existing.save();
+        } catch (callErr) {
+          console.error("Confirmation call failed:", callErr);
+        }
+      }
+
       return res.json({ application: toApplicationResponse(existing) });
     }
 
@@ -604,11 +752,22 @@ app.post("/api/applications/start", async (req, res) => {
 
     const application = await createApplicantApplication(user, visaType, phone, attorney._id);
     await application.populate("attorneyUserId", "fullName");
+
+    if (phone) {
+      try {
+        const callResult = await notifyApplicantByPhone(application, "started");
+        application.callLog = [...(application.callLog || []), callResult];
+        await application.save();
+      } catch (callErr) {
+        console.error("Confirmation call failed:", callErr);
+      }
+    }
+
     return res.status(201).json({ application: toApplicationResponse(application) });
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === 11000) {
       const { visaType } = req.body || {};
-      const existing = await Application.findOne({ applicantUserId: user._id, visaType });
+      const existing = await Application.findOne({ applicantUserId: user._id, visaType }).populate("attorneyUserId", "fullName");
       if (existing) {
         return res.json({ application: toApplicationResponse(existing) });
       }
@@ -623,7 +782,7 @@ app.post("/api/applications/:slug/documents", async (req, res) => {
     const user = await getUserFromRequest(req);
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    const application = await Application.findOne({ slug: req.params.slug }).populate(
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate(
       "attorneyUserId",
       "fullName",
     );
@@ -655,6 +814,13 @@ app.post("/api/applications/:slug/documents", async (req, res) => {
     doc.uploadedAt = new Date();
 
     application.documents = documents;
+
+    if (!application.submittedToAttorney) {
+      application.submittedToAttorney = true;
+      application.submittedAt = new Date();
+      application.status = "processing";
+      application.updatedLabel = "just now";
+    }
     await syncApplicationProgress(application);
     const afterPipeline = await maybeAutoRunPipeline(application);
 
@@ -665,12 +831,39 @@ app.post("/api/applications/:slug/documents", async (req, res) => {
   }
 });
 
+app.post("/api/applications/:slug/submit", async (req, res) => {
+  try {
+    const user = await getUserFromRequest(req);
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate("attorneyUserId", "fullName");
+    if (!application) return res.status(404).json({ message: "Application not found" });
+
+    if (user.role === "user" && application.applicantUserId?.toString() !== user._id.toString()) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    application.submittedToAttorney = true;
+    application.submittedAt = new Date();
+    application.status = "processing";
+    application.updatedLabel = "just now";
+    await application.save();
+    await application.populate("attorneyUserId", "fullName");
+
+    return res.json({ application: toApplicationResponse(application) });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Submission failed";
+    console.error("Submission failed:", error);
+    return res.status(400).json({ message });
+  }
+});
+
 app.post("/api/applications/:slug/pipeline/run", async (req, res) => {
   try {
     const user = await getUserFromRequest(req);
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    const application = await Application.findOne({ slug: req.params.slug });
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate("attorneyUserId", "fullName");
     if (!application) return res.status(404).json({ message: "Application not found" });
 
     if (user.role === "user" && application.applicantUserId?.toString() !== user._id.toString()) {
@@ -678,6 +871,7 @@ app.post("/api/applications/:slug/pipeline/run", async (req, res) => {
     }
 
     const updated = await runPipelineForApplication(application);
+    await updated.populate("attorneyUserId", "fullName");
     return res.json({ application: toApplicationResponse(updated) });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Pipeline failed";
@@ -694,7 +888,7 @@ app.post("/api/applications/:slug/human-review", async (req, res) => {
       return res.status(403).json({ message: "Attorney access required" });
     }
 
-    const application = await Application.findOne({ slug: req.params.slug }).populate(
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate(
       "attorneyUserId",
       "fullName",
     );
@@ -734,6 +928,194 @@ app.post("/api/applications/:slug/human-review", async (req, res) => {
   }
 });
 
+app.post("/api/applications/:slug/call", async (req, res) => {
+  try {
+    const user = await getUserFromRequest(req);
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (user.role !== "attorney") {
+      return res.status(403).json({ message: "Attorney access required" });
+    }
+
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate(
+      "attorneyUserId",
+      "fullName",
+    );
+    if (!application) return res.status(404).json({ message: "Application not found" });
+
+    const assignedId =
+      typeof application.attorneyUserId === "object" && application.attorneyUserId?._id
+        ? application.attorneyUserId._id.toString()
+        : application.attorneyUserId?.toString();
+
+    if (!assignedId || assignedId !== user._id.toString()) {
+      return res.status(403).json({ message: "This case is not assigned to you" });
+    }
+
+    const { script, phoneNumber } = req.body || {};
+    if (!script || typeof script !== "string" || !script.trim()) {
+      return res.status(400).json({ message: "A valid script string is required to call" });
+    }
+
+    if (phoneNumber && typeof phoneNumber === "string" && phoneNumber.trim()) {
+      const normalized = normalizePhone(phoneNumber.trim());
+      if (normalized) {
+        application.phoneNumber = normalized;
+        await application.save();
+      }
+    }
+
+    const updated = await triggerApplicantCall(application, script.trim());
+    if (updated.callLog?.length) {
+      const last = updated.callLog[updated.callLog.length - 1];
+      if (last?.skipped) {
+        return res.status(400).json({ message: last.reason || "Call skipped" });
+      }
+      if (last?.error) {
+        return res.status(500).json({ message: last.error || "Call failed" });
+      }
+    }
+    return res.json({
+      application: toApplicationResponse(updated),
+      call: updated.callLog[updated.callLog.length - 1],
+    });
+  } catch (error) {
+    console.error("Outbound custom call failed:", error);
+    return res.status(500).json({ message: "Outbound custom call failed" });
+  }
+});
+
+async function consolidateBallaAttorneys() {
+  const attorneys = await User.find({ role: "attorney", fullName: /balla/i });
+  if (attorneys.length <= 1) return;
+
+  console.log(`[Consolidation] Found ${attorneys.length} duplicate Balla attorney accounts. Consolidating...`);
+  // Let's pick b@g.com as the main one if it exists, otherwise balla@visaiq.demo, otherwise the first one
+  const mainBalla = attorneys.find(a => a.email === "b@g.com") || attorneys.find(a => a.email === "balla@visaiq.demo") || attorneys[0];
+
+  for (const duplicate of attorneys) {
+    if (duplicate._id.toString() === mainBalla._id.toString()) continue;
+    
+    console.log(`[Consolidation] Transferring cases from duplicate Balla (${duplicate.email}) to main Balla (${mainBalla.email})...`);
+    await Application.updateMany(
+      { attorneyUserId: duplicate._id },
+      { $set: { attorneyUserId: mainBalla._id } }
+    );
+    // Delete duplicate user
+    await User.deleteOne({ _id: duplicate._id });
+    console.log(`[Consolidation] Deleted duplicate attorney user: ${duplicate.email}`);
+  }
+}
+
+async function seedApplicantAyushAndCase() {
+  const balla = await User.findOne({ email: "b@g.com" }) || await User.findOne({ email: "balla@visaiq.demo" });
+  if (!balla) {
+    console.log("Warning: Balla not found, cannot seed Ayush case yet.");
+    return;
+  }
+
+  let ayushUser = await User.findOne({ email: "ayush@visaiq.demo" });
+  if (!ayushUser) {
+    const passwordHash = await bcrypt.hash("user123", 10);
+    ayushUser = await User.create({
+      email: "ayush@visaiq.demo",
+      fullName: "Ayush",
+      role: "user",
+      passwordHash,
+    });
+    console.log("Seeded applicant user Ayush (email: ayush@visaiq.demo, password: user123)");
+  }
+
+  let ayushApp = await Application.findOne({ applicantUserId: ayushUser._id, visaType: "O-1" });
+  if (!ayushApp) {
+    ayushApp = await Application.findOne({ slug: "ayush" });
+  }
+
+  if (!ayushApp) {
+    const documents = buildDocumentChecklist("O-1", []);
+    documents.forEach((doc, idx) => {
+      if (idx < 2) {
+        doc.fileName = `${doc.docId}-doc.pdf`;
+        doc.status = "uploaded";
+        doc.notes = "Extracted passport / resume text showing applicant credentials.";
+      }
+    });
+
+    ayushApp = await Application.create({
+      slug: "ayush",
+      applicantName: "Ayush",
+      visaType: "O-1",
+      phoneNumber: "+15550199",
+      attorneyUserId: balla._id,
+      status: "needs_info",
+      score: 42,
+      updatedLabel: "just now",
+      progress: {
+        documentsReceived: 40,
+        identityVerification: 42,
+        financialReview: 45,
+        finalDecision: 50,
+      },
+      documents,
+      pipeline: {
+        status: "awaiting_human",
+        ranAt: new Date(),
+        validator: {
+          agent: "Validator",
+          score: 42,
+          summary: "O-1 extraordinary ability criteria missing or weak.",
+          findings: [
+            { type: "warning", message: "Passport validity expires in 3 months." }
+          ],
+          recommendation: "needs_info",
+          confidence: 85,
+        },
+        consistency: {
+          agent: "Consistency Check",
+          score: 45,
+          summary: "Resume timeline conflicts with educational degree graduation date.",
+          findings: [
+            { type: "error", message: "Resume shows work starting prior to degree graduation date." }
+          ],
+          recommendation: "needs_info",
+          confidence: 90,
+        },
+        decider: {
+          agent: "Decider",
+          score: 42,
+          summary: "AI recommends review or requesting additional evidence due to insufficient proof of national recognition.",
+          recommendation: "needs_info",
+          reasons: ["Gaps in extraordinary achievement documentation", "Low verification score"],
+          confidence: 88,
+        }
+      },
+      humanReview: {
+        status: "pending",
+        reviewedBy: null,
+        reviewedAt: null,
+        attorneyNotes: "",
+      },
+      callLog: [],
+      applicantUserId: ayushUser._id,
+      submittedToAttorney: true,
+      submittedAt: new Date(),
+    });
+    console.log("Seeded O-1 visa application for Ayush with AI score of 42 assigned to Balla.");
+  } else {
+    let changed = false;
+    if (ayushApp.score !== 42) {
+      ayushApp.score = 42;
+      changed = true;
+    }
+    if (String(ayushApp.attorneyUserId || "") !== String(balla._id)) {
+      ayushApp.attorneyUserId = balla._id;
+      changed = true;
+    }
+    if (changed) {
+      await ayushApp.save();
+    }
+  }
+}
+
 app.get("/api/applications/:slug", async (req, res) => {
   try {
     const user = await getUserFromRequest(req);
@@ -741,7 +1123,7 @@ app.get("/api/applications/:slug", async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const application = await Application.findOne({ slug: req.params.slug }).populate(
+    const application = await Application.findOne(findApplicationQuery(req.params.slug)).populate(
       "attorneyUserId",
       "fullName",
     );
@@ -784,8 +1166,12 @@ async function start() {
   });
   await mongoose.connect(MONGO_URL);
   console.log(`MongoDB connected: ${MONGO_URL}`);
+  // Auto-verify all attorney accounts (e.g. registered ones)
+  await User.updateMany({ role: "attorney" }, { $set: { attorneyVerified: true } });
   await seedVerifiedAttorneysIfEmpty();
   await seedApplicationsIfEmpty();
+  await consolidateBallaAttorneys();
+  await seedApplicantAyushAndCase();
   app.listen(PORT, () => {
     console.log(`API running on http://localhost:${PORT}`);
   });

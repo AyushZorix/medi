@@ -4,7 +4,7 @@ import {
   allMandatoryUploaded,
 } from "./visaDocuments.mjs";
 import { runAgentPipeline } from "./pipeline.mjs";
-import { notifyApplicantByPhone } from "./calls.mjs";
+import { notifyApplicantByPhone, callApplicantWithCustomScript } from "./calls.mjs";
 
 export function computeProgress(application, documents) {
   const docRate = documentsCompletionRate(documents);
@@ -59,17 +59,24 @@ export function enrichApplication(application) {
     humanReview: application.humanReview || { status: "pending" },
     callLog: application.callLog || [],
     canRunPipeline: allMandatoryUploaded(documents) && application.pipeline?.status !== "running",
+    submittedToAttorney: application.submittedToAttorney ?? false,
+    submittedAt: application.submittedAt || null,
   };
 }
 
 export async function syncApplicationProgress(application) {
   const documents = buildDocumentChecklist(application.visaType, application.documents);
   application.documents = documents;
+  application.markModified("documents");
+
   application.progress = computeProgress(application, documents);
   const p = application.progress;
   application.score = Math.round(
     (p.documentsReceived + p.identityVerification + p.financialReview) / 3,
   );
+  application.markModified("progress");
+  application.markModified("pipeline");
+  application.markModified("humanReview");
   application.updatedLabel = "just now";
   await application.save();
   return application;
@@ -78,31 +85,20 @@ export async function syncApplicationProgress(application) {
 /** Runs the AI pipeline when all mandatory docs are uploaded and it has not run yet. */
 export async function maybeAutoRunPipeline(application) {
   const documents = buildDocumentChecklist(application.visaType, application.documents);
-  const status = application.pipeline?.status ?? "idle";
-
-  if (!application.attorneyUserId) return application;
-  if (!allMandatoryUploaded(documents)) return application;
-  if (status === "running" || status === "awaiting_human") return application;
-
-  try {
+  if (allMandatoryUploaded(documents)) {
     return await runPipelineForApplication(application);
-  } catch (error) {
-    console.error("Auto pipeline failed:", error);
-    return application;
   }
+  return application;
 }
 
 export async function runPipelineForApplication(application) {
-  const documents = buildDocumentChecklist(application.visaType, application.documents);
-  if (!allMandatoryUploaded(documents)) {
-    throw new Error("Upload all mandatory documents before running the AI pipeline");
-  }
-
   application.pipeline = { status: "running", ranAt: new Date() };
+  application.markModified("pipeline");
   await application.save();
 
   const pipeline = await runAgentPipeline(application);
   application.pipeline = pipeline;
+  application.markModified("pipeline");
   application.status = "needs_info";
   if (pipeline.decider?.recommendation === "approve") {
     application.status = "processing";
@@ -116,6 +112,7 @@ export async function runPipelineForApplication(application) {
     reviewedAt: null,
     attorneyNotes: "",
   };
+  application.markModified("humanReview");
 
   await syncApplicationProgress(application);
   return application;
@@ -151,4 +148,11 @@ export async function submitHumanReview(application, { approved, attorneyNotes, 
   return { application, callResult };
 }
 
-export { runAgentPipeline, notifyApplicantByPhone };
+export async function triggerApplicantCall(application, script) {
+  const callResult = await callApplicantWithCustomScript(application, script);
+  application.callLog = [...(application.callLog || []), callResult];
+  await application.save();
+  return application;
+}
+
+export { runAgentPipeline, notifyApplicantByPhone, callApplicantWithCustomScript };

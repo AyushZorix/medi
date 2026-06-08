@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let mounted = true;
@@ -57,18 +59,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await apiSignOut();
+    queryClient.clear();
     setUser(null);
-  }, []);
+  }, [queryClient]);
 
   const refreshSession = useCallback(async () => {
     setLoading(true);
     try {
+      queryClient.clear();
       const nextUser = await getSession();
       setUser(nextUser);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [queryClient]);
 
   const role = user?.role ?? null;
 

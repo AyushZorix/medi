@@ -19,7 +19,11 @@ const API_BASE =
 async function parseJson<T>(res: Response): Promise<T> {
   const text = await res.text();
   if (!text) return {} as T;
-  return JSON.parse(text) as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return { message: text } as unknown as T;
+  }
 }
 
 async function handleAuthResponse<T>(res: Response): Promise<T> {
@@ -34,6 +38,7 @@ export async function signUp(params: {
   password: string;
   fullName: string;
   role: UserRole;
+  attorneyVisaTypes?: string[];
 }): Promise<User> {
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",

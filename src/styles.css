@@ -408,14 +408,25 @@ html.lenis body {
 }
 
 @utility glass {
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 2px oklch(0.22 0.01 260 / 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 @utility glass-strong {
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-elevated);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 
+    0 12px 40px -12px rgba(0, 0, 0, 0.6),
+    0 0 24px -4px color-mix(in oklch, var(--primary) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 @utility text-gradient {
   background: var(--gradient-aurora);
@@ -448,11 +459,11 @@ html.lenis body {
 }
 
 :root {
-  --primary: oklch(0.95 0.16 118.89);
+  --primary: oklch(0.68 0.18 268);
 }
 
 .dark {
-  --primary: oklch(0.95 0.16 118.89);
+  --primary: oklch(0.68 0.18 268);
 }
 
 @keyframes marquee {

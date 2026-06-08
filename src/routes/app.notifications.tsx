@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { listApplications } from "@/lib/applications";
 import { Mail, MessageSquare, Bell, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,19 +18,20 @@ export const Route = createFileRoute("/app/notifications")({
   component: Notifications,
 });
 
-const items = [
-  { t: "2m", c: "email" as const, title: "Approved: Amelia Chen", body: "F-1 application approved · Confirmation email sent", unread: true },
-  { t: "8m", c: "sms" as const, title: "Sofia Marquez: More info needed", body: "Follow-up documents requested · Text alert sent", unread: true },
-  { t: "12m", c: "app" as const, title: "Approved: Daniel Okafor", body: "AI confidence 92% · Attorney signed off", unread: true },
-  { t: "1h", c: "email" as const, title: "Weekly summary", body: "47 cases processed · Compliance team updated", unread: false },
-  { t: "3h", c: "app" as const, title: "Pipeline completed", body: "Rohan Patel O-1 · Consistency check flagged 1 item", unread: false },
-];
-
 const iconMap = { email: Mail, sms: MessageSquare, app: Bell };
 const channelLabel = { email: "Email", sms: "SMS", app: "In-app" };
 
-function NotificationList({ filter }: { filter?: "email" | "sms" | "app" }) {
+function NotificationList({ items, filter }: { items: any[]; filter?: "email" | "sms" | "app" }) {
   const list = filter ? items.filter((i) => i.c === filter) : items;
+  
+  if (list.length === 0) {
+    return (
+      <div className="py-8 text-center text-sm text-muted-foreground">
+        No notifications in this category.
+      </div>
+    );
+  }
+
   return (
     <ScrollArea className="h-[min(480px,55vh)] pr-4">
       <div className="relative space-y-1">
@@ -37,7 +40,7 @@ function NotificationList({ filter }: { filter?: "email" | "sms" | "app" }) {
           const Icon = iconMap[i.c];
           return (
             <button
-              key={i.title}
+              key={i.id}
               type="button"
               onClick={() => toast.success(i.title, { description: i.body })}
               className={`relative flex w-full gap-4 rounded-xl border border-transparent p-4 text-left transition hover:border-border/40 hover:bg-white/[0.03] ${i.unread ? "border-primary/20 bg-primary/5" : ""}`}
@@ -51,7 +54,7 @@ function NotificationList({ filter }: { filter?: "email" | "sms" | "app" }) {
                     <span className="text-sm font-medium">{i.title}</span>
                     {i.unread && <span className="size-2 rounded-full bg-primary" />}
                   </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">{i.t} ago</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{i.t}</span>
                 </div>
                 <p className="mt-0.5 text-sm text-muted-foreground">{i.body}</p>
                 <Badge variant="secondary" className="mt-2">
@@ -67,7 +70,78 @@ function NotificationList({ filter }: { filter?: "email" | "sms" | "app" }) {
 }
 
 function Notifications() {
-  const unread = items.filter((i) => i.unread).length;
+  const { data: applications = [], isLoading } = useQuery({
+    queryKey: ["applications"],
+    queryFn: listApplications,
+  });
+
+  const dynamicItems = applications.flatMap((a) => {
+    const list = [];
+    const timeText = a.updated || "just now";
+
+    if (a.status === "approved") {
+      list.push({
+        id: `${a.id}-approved`,
+        t: timeText,
+        c: "email" as const,
+        title: `Approved: ${a.applicantName}`,
+        body: `${a.visaType} application approved · Outbound status call logged`,
+        unread: false,
+      });
+    } else if (a.status === "rejected") {
+      list.push({
+        id: `${a.id}-rejected`,
+        t: timeText,
+        c: "sms" as const,
+        title: `Rejected: ${a.applicantName}`,
+        body: `${a.visaType} application rejected · Decision call completed`,
+        unread: false,
+      });
+    }
+
+    if (a.status === "needs_info") {
+      list.push({
+        id: `${a.id}-needs-info`,
+        t: timeText,
+        c: "sms" as const,
+        title: `${a.applicantName}: Action Required`,
+        body: `Attorney requested follow-up documents / notes`,
+        unread: true,
+      });
+    }
+
+    if (a.pipeline?.status === "awaiting_human") {
+      list.push({
+        id: `${a.id}-pipeline`,
+        t: timeText,
+        c: "app" as const,
+        title: `Pipeline complete: ${a.applicantName}`,
+        body: `${a.visaType} case · AI score ${a.score}% · Awaiting human review`,
+        unread: true,
+      });
+    } else if (a.pipeline?.status === "running") {
+      list.push({
+        id: `${a.id}-running`,
+        t: timeText,
+        c: "app" as const,
+        title: `Pipeline active: ${a.applicantName}`,
+        body: `AI validator and consistency analysis in progress`,
+        unread: true,
+      });
+    }
+
+    return list;
+  });
+
+  const unread = dynamicItems.filter((i) => i.unread).length;
+
+  if (isLoading) {
+    return (
+      <AppPage>
+        <p className="text-sm text-muted-foreground">Loading notifications...</p>
+      </AppPage>
+    );
+  }
 
   return (
     <AppPage>
@@ -75,7 +149,7 @@ function Notifications() {
         portal="attorney"
         eyebrow="Activity"
         title="Notifications"
-        description={`${unread} unread updates across email, SMS, and in-app alerts.`}
+        description={`${unread} unread update${unread === 1 ? "" : "s"} across email, SMS, and in-app alerts.`}
         actions={
           <Button
             variant="outline"
@@ -100,28 +174,28 @@ function Notifications() {
               <GlassCardTitle className="text-base">Recent activity</GlassCardTitle>
             </GlassCardHeader>
             <GlassCardContent className="pt-0">
-              <NotificationList />
+              <NotificationList items={dynamicItems} />
             </GlassCardContent>
           </GlassCard>
         </TabsContent>
         <TabsContent value="email" className="mt-4">
           <GlassCard>
             <GlassCardContent className="pt-6">
-              <NotificationList filter="email" />
+              <NotificationList items={dynamicItems} filter="email" />
             </GlassCardContent>
           </GlassCard>
         </TabsContent>
         <TabsContent value="sms" className="mt-4">
           <GlassCard>
             <GlassCardContent className="pt-6">
-              <NotificationList filter="sms" />
+              <NotificationList items={dynamicItems} filter="sms" />
             </GlassCardContent>
           </GlassCard>
         </TabsContent>
         <TabsContent value="app" className="mt-4">
           <GlassCard>
             <GlassCardContent className="pt-6">
-              <NotificationList filter="app" />
+              <NotificationList items={dynamicItems} filter="app" />
             </GlassCardContent>
           </GlassCard>
         </TabsContent>

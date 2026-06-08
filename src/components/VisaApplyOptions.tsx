@@ -16,6 +16,22 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const DEFAULT_COUNTRY_CODES = [
+  { code: "+1", label: "🇺🇸 +1" },
+  { code: "+91", label: "🇮🇳 +91" },
+  { code: "+44", label: "🇬🇧 +44" },
+  { code: "+1-CA", label: "🇨🇦 +1" },
+  { code: "+61", label: "🇦🇺 +61" },
+  { code: "+81", label: "🇯🇵 +81" },
+];
 
 const icons: Record<ApplicantVisaChoice, typeof GraduationCap> = {
   "F-1": GraduationCap,
@@ -23,13 +39,47 @@ const icons: Record<ApplicantVisaChoice, typeof GraduationCap> = {
   "B-1/B-2": Plane,
 };
 
-const OCEAN_IMAGE =
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=80";
-
 function visaKey(visaType: string): ApplicantVisaChoice | null {
   if (visaType === "F-1" || visaType === "O-1" || visaType === "B-1/B-2") return visaType;
   if (visaType === "B-1" || visaType === "B-2") return "B-1/B-2";
   return null;
+}
+
+function parsePhoneNumber(
+  rawPhone: string,
+  countryCodes: { code: string; label: string }[],
+  onAddExtraCode: (code: string) => void
+): { code: string; number: string } {
+  if (!rawPhone) return { code: "+1", number: "" };
+
+  const matched = countryCodes.find((c) => rawPhone.startsWith(c.code.split("-")[0]));
+  if (matched) {
+    const codeVal = matched.code.split("-")[0];
+    return { code: codeVal, number: rawPhone.slice(codeVal.length) };
+  }
+
+  if (rawPhone.startsWith("+")) {
+    let detectedCode = "";
+    let remaining = rawPhone;
+
+    if (/^\+\d{3}/.test(rawPhone)) {
+      detectedCode = rawPhone.slice(0, 4);
+      remaining = rawPhone.slice(4);
+    } else if (/^\+\d{2}/.test(rawPhone)) {
+      detectedCode = rawPhone.slice(0, 3);
+      remaining = rawPhone.slice(3);
+    } else if (/^\+\d{1}/.test(rawPhone)) {
+      detectedCode = rawPhone.slice(0, 2);
+      remaining = rawPhone.slice(2);
+    }
+
+    if (detectedCode) {
+      onAddExtraCode(detectedCode);
+      return { code: detectedCode, number: remaining };
+    }
+  }
+
+  return { code: "+1", number: rawPhone };
 }
 
 type VisaApplyOptionsProps = {
@@ -39,10 +89,35 @@ type VisaApplyOptionsProps = {
 
 export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyOptionsProps) {
   const queryClient = useQueryClient();
-  const [selected, setSelected] = useState<ApplicantVisaChoice>("F-1");
+  
+  const visibleVisaOptions = APPLICANT_VISA_OPTIONS;
+
+  const [selected, setSelected] = useState<ApplicantVisaChoice | null>(() => {
+    if (existingApplications.length > 0) {
+      const firstApp = existingApplications[0];
+      const key = visaKey(firstApp.visaType);
+      if (key) return key;
+    }
+    return null;
+  });
+
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState("+1");
   const [attorneyUserId, setAttorneyUserId] = useState("");
   const [hoveredOption, setHoveredOption] = useState<ApplicantVisaChoice | null>(null);
+  
+  const [extraCountryCodes, setExtraCountryCodes] = useState<{ code: string; label: string }[]>([]);
+  const countryCodes = [...DEFAULT_COUNTRY_CODES, ...extraCountryCodes];
+
+  // Track initialization status and active selections
+  const [hasInitialized, setHasInitialized] = useState(false);
+  const [lastSelected, setLastSelected] = useState<ApplicantVisaChoice | null>(selected);
+
+  useEffect(() => {
+    if (visibleVisaOptions.length > 0 && selected && !visibleVisaOptions.some((opt) => opt.id === selected)) {
+      setSelected(visibleVisaOptions[0].id);
+    }
+  }, [visibleVisaOptions, selected]);
 
   const existingTypes = new Set(
     existingApplications
@@ -50,22 +125,89 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
       .filter((v): v is ApplicantVisaChoice => v !== null),
   );
 
-  const existingApp = existingApplications.find((a) => visaKey(a.visaType) === selected);
+  const existingApp = selected
+    ? existingApplications.find((a) => visaKey(a.visaType) === selected)
+    : undefined;
   const needsAttorneyOnly = Boolean(existingApp && !existingApp.forwardedToAttorney);
+  const attorneyChanged = Boolean(
+    existingApp &&
+    attorneyUserId &&
+    existingApp.attorneyUserId !== attorneyUserId
+  );
 
+  // 1. Initial mounting/loading seeding from first available case or current selected case
   useEffect(() => {
-    if (existingApp?.attorneyUserId) setAttorneyUserId(existingApp.attorneyUserId);
-    if (existingApp?.phoneNumber) setPhoneNumber(existingApp.phoneNumber);
-  }, [existingApp?.attorneyUserId, existingApp?.phoneNumber]);
+    if (!hasInitialized && existingApplications.length > 0) {
+      const firstApp = selected
+        ? existingApplications.find((a) => visaKey(a.visaType) === selected)
+        : existingApplications[0];
+      if (firstApp) {
+        const key = visaKey(firstApp.visaType);
+        if (key) setSelected(key);
+        if (firstApp.attorneyUserId) setAttorneyUserId(firstApp.attorneyUserId);
+        
+        const { code, number } = parsePhoneNumber(
+          firstApp.phoneNumber || "",
+          countryCodes,
+          (extraCode) => {
+            setExtraCountryCodes((prev) => {
+              if (prev.some((c) => c.code === extraCode)) return prev;
+              return [...prev, { code: extraCode, label: `🌍 ${extraCode}` }];
+            });
+          }
+        );
+        setCountryCode(code);
+        setPhoneNumber(number);
+        setHasInitialized(true);
+      }
+    }
+  }, [existingApplications, selected, hasInitialized, countryCodes]);
+
+  // 2. Tab change preservation/load logic
+  useEffect(() => {
+    if (selected !== lastSelected) {
+      setLastSelected(selected);
+      if (!selected) return;
+      const newApp = existingApplications.find((a) => visaKey(a.visaType) === selected);
+      if (newApp) {
+        if (newApp.attorneyUserId) {
+          setAttorneyUserId(newApp.attorneyUserId);
+        } else {
+          setAttorneyUserId("");
+        }
+        const { code, number } = parsePhoneNumber(
+          newApp.phoneNumber || "",
+          countryCodes,
+          (extraCode) => {
+            setExtraCountryCodes((prev) => {
+              if (prev.some((c) => c.code === extraCode)) return prev;
+              return [...prev, { code: extraCode, label: `🌍 ${extraCode}` }];
+            });
+          }
+        );
+        setCountryCode(code);
+        setPhoneNumber(number);
+      } else {
+        setAttorneyUserId("");
+      }
+    }
+  }, [selected, lastSelected, existingApplications, countryCodes]);
 
   const mutation = useMutation({
-    mutationFn: () => startApplication(selected, phoneNumber, attorneyUserId),
+    mutationFn: () => {
+      if (!selected) {
+        throw new Error("Select a visa type before starting an application");
+      }
+      const cleanCode = countryCode.split("-")[0];
+      const fullPhone = cleanCode + phoneNumber.replace(/\D/g, "");
+      return startApplication(selected, fullPhone, attorneyUserId);
+    },
     onSuccess: async (app) => {
       await queryClient.invalidateQueries({ queryKey: ["my-applications"] });
       toast.success(
         app.forwardedToAttorney
           ? `Case forwarded to ${app.attorneyName ?? "your attorney"}`
-          : `Application ready — upload mandatory ${selected} documents next`,
+          : `Application ready — upload mandatory ${app.visaType} documents next`,
       );
       onStarted?.(app);
     },
@@ -74,41 +216,21 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
     },
   });
 
-  const selectedAlreadyExists = existingTypes.has(selected);
-  const canSubmit = Boolean(phoneNumber.trim() && attorneyUserId);
+  const selectedAlreadyExists = selected ? existingTypes.has(selected) : false;
+  const canSubmit = Boolean(selected && phoneNumber.trim() && attorneyUserId);
 
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-medium tracking-tight">Apply for a visa</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Select a verified attorney first — your case is only forwarded after you choose one. We
-          will call your mobile number when a final decision is made.
+          Select a visa type first, then choose a verified attorney who specializes in that visa.
+          We will call your mobile number when a final decision is made.
         </p>
       </div>
 
-      <AttorneySelect
-        value={attorneyUserId}
-        onChange={setAttorneyUserId}
-        disabled={mutation.isPending}
-      />
-
-      <div className="space-y-2">
-        <Label htmlFor="phone" className="flex items-center gap-2">
-          <Phone className="size-3.5" /> Mobile number (for status calls)
-        </Label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="+1 (555) 123-4567"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className="border-border/60 bg-muted/50 max-w-md"
-        />
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-3">
-        {APPLICANT_VISA_OPTIONS.map((opt) => {
+      <div className={cn("grid gap-3", visibleVisaOptions.length === 1 ? "md:grid-cols-1 max-w-sm" : "md:grid-cols-3")}>
+        {visibleVisaOptions.map((opt) => {
           const Icon = icons[opt.id];
           const active = selected === opt.id;
           const started = existingTypes.has(opt.id);
@@ -161,6 +283,44 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
           );
         })}
       </div>
+
+      <AttorneySelect
+        value={attorneyUserId}
+        onChange={setAttorneyUserId}
+        disabled={mutation.isPending || !selected}
+        visaType={selected}
+      />
+
+      <div className="space-y-2">
+        <Label htmlFor="phone" className="flex items-center gap-2">
+          <Phone className="size-3.5" /> Mobile number (for status calls)
+        </Label>
+        <div className="flex gap-2 max-w-md">
+          <div className="w-[110px] shrink-0">
+            <Select value={countryCode} onValueChange={setCountryCode} disabled={mutation.isPending}>
+              <SelectTrigger className="border-border/60 bg-muted/50 h-10 cursor-pointer">
+                <SelectValue placeholder="Code" />
+              </SelectTrigger>
+              <SelectContent className="glass border-white/10 z-50">
+                {countryCodes.map((c) => (
+                  <SelectItem key={c.label} value={c.code} className="cursor-pointer">
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="one-time-code"
+            placeholder="Enter phone number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="border-border/60 bg-muted/50 flex-1 h-10"
+          />
+        </div>
+      </div>
       <Button
         variant="gradient"
         disabled={mutation.isPending || !canSubmit}
@@ -170,9 +330,13 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
         {mutation.isPending && <Loader2 className="size-4 animate-spin mr-2" />}
         {needsAttorneyOnly
           ? "Forward case to attorney"
-          : selectedAlreadyExists
-            ? `Continue ${selected} application`
-            : `Start ${selected} application`}
+          : attorneyChanged
+            ? "Redirect case to selected attorney"
+            : selectedAlreadyExists && selected
+              ? `Continue ${selected} application`
+              : selected
+                ? `Start ${selected} application`
+                : "Select a visa type"}
       </Button>
     </div>
   );

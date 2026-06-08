@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Scale, Loader2, Search } from "lucide-react";
+import { Scale, Loader2, Search, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { listVerifiedAttorneys } from "@/lib/attorneys";
@@ -12,14 +12,35 @@ type AttorneySelectProps = {
   value: string;
   onChange: (attorneyId: string) => void;
   disabled?: boolean;
+  visaType?: string | null;
 };
 
-export function AttorneySelect({ value, onChange, disabled }: AttorneySelectProps) {
+export function AttorneySelect({ value, onChange, disabled, visaType }: AttorneySelectProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const { data: attorneys = [], isLoading, isError } = useQuery({
-    queryKey: ["verified-attorneys"],
-    queryFn: listVerifiedAttorneys,
+    queryKey: ["verified-attorneys", debouncedSearch, visaType],
+    queryFn: () => listVerifiedAttorneys(debouncedSearch, visaType ?? undefined),
+    enabled: Boolean(visaType),
   });
+
+  const hasNoAttorneys = attorneys.length === 0 && !searchTerm.trim();
+
+  if (!visaType) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Select a visa type to see attorneys who specialize in that category.
+      </p>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -29,7 +50,7 @@ export function AttorneySelect({ value, onChange, disabled }: AttorneySelectProp
     );
   }
 
-  if (isError || attorneys.length === 0) {
+  if (isError || (hasNoAttorneys && attorneys.length === 0)) {
     return (
       <p className="text-sm text-muted-foreground">
         No verified attorneys are available yet. Please try again later or contact support.
@@ -37,13 +58,11 @@ export function AttorneySelect({ value, onChange, disabled }: AttorneySelectProp
     );
   }
 
-  const filteredAttorneys = attorneys.filter((attorney) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      attorney.fullName.toLowerCase().includes(term) ||
-      attorney.specialty.toLowerCase().includes(term)
-    );
-  });
+  const filteredAttorneys = attorneys.filter((attorney) =>
+    !searchTerm.trim() ||
+    attorney.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (attorney.specialty && attorney.specialty.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="space-y-3">
@@ -52,8 +71,8 @@ export function AttorneySelect({ value, onChange, disabled }: AttorneySelectProp
           <Scale className="size-3.5" /> Choose your immigration attorney
         </Label>
         <p className="text-xs text-muted-foreground">
-          Your case is forwarded only to the attorney you select. They will review it after AI
-          validation.
+          Showing attorneys who specialize in the selected visa type. Your case is forwarded only
+          to the attorney you select.
         </p>
       </div>
 
@@ -83,16 +102,26 @@ export function AttorneySelect({ value, onChange, disabled }: AttorneySelectProp
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 350, damping: 20 }}
                 className={cn(
-                  "landing-card rounded-xl p-4 text-left transition-all duration-300",
+                  "landing-card rounded-xl p-4 text-left transition-all duration-300 relative overflow-hidden",
                   active
-                    ? "border-[var(--landing-accent)]/50 bg-white/[0.08] shadow-glow"
+                    ? "border-2 border-primary bg-primary/15 shadow-[0_0_20px_rgba(124,58,237,0.2)]"
                     : "bg-white/[0.02] border-white/5 opacity-90 hover:opacity-100",
                 )}
               >
-                <p className="text-sm font-medium">
-                  {attorney.fullName}
-                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">
+                    {attorney.fullName}
+                  </p>
+                  {active && (
+                    <CheckCircle2 className="size-4 text-primary shrink-0 mt-0.5" />
+                  )}
+                </div>
                 <p className="mt-1 text-xs text-muted-foreground">{attorney.specialty}</p>
+                {attorney.visaTypes?.length ? (
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {attorney.visaTypes.join(" · ")}
+                  </p>
+                ) : null}
               </motion.button>
             );
           })}

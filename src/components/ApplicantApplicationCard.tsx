@@ -40,18 +40,15 @@ export function ApplicantApplicationCard({ application }: ApplicantApplicationCa
       className="h-full"
     >
       <GlassCard
-        className={cn(
-          "h-full transition-all duration-300 border-border/40",
-          isHovered ? "bg-white/[0.06] border-white/20 shadow-glow" : "bg-white/[0.03]"
-        )}
+        className="h-full border-white/[0.04]"
       >
         <GlassCardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <GlassCardTitle className="select-none">
-                {`${application.visaType} application`}
+              <GlassCardTitle className="select-none font-bold text-base">
+                {`${application.visaType} Application`}
               </GlassCardTitle>
-              <GlassCardDescription>
+              <GlassCardDescription className="text-[11px] font-light mt-0.5">
                 Case {application.slug} · {mandatoryUploaded}/{mandatoryTotal} documents
                 {application.forwardedToAttorney && application.attorneyName
                   ? ` · Attorney: ${application.attorneyName}`
@@ -65,10 +62,10 @@ export function ApplicantApplicationCard({ application }: ApplicantApplicationCa
           </div>
         </GlassCardHeader>
         <GlassCardContent className="space-y-4 pt-0">
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-muted/30 p-4">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
             <div>
-              <p className="text-sm font-medium">Overall progress</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-semibold tracking-tight">Overall progress</p>
+              <p className="text-[11px] text-muted-foreground/80 font-light mt-0.5">
                 {!application.forwardedToAttorney
                   ? "Select an attorney to forward your case"
                   : application.pipeline.status === "awaiting_human"
@@ -78,7 +75,7 @@ export function ApplicantApplicationCard({ application }: ApplicantApplicationCa
                       : "AI pipeline in progress"}
               </p>
             </div>
-            <p className="text-2xl font-semibold tabular-nums text-gradient">{application.overallProgress}%</p>
+            <p className="text-2xl font-bold tabular-nums text-gradient">{application.overallProgress}%</p>
           </div>
           <div className="space-y-3">
             {steps.map((s) => (
