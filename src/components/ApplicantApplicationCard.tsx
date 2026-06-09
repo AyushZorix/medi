@@ -40,7 +40,7 @@ export function ApplicantApplicationCard({ application }: ApplicantApplicationCa
       className="h-full"
     >
       <GlassCard
-        className="h-full border-white/[0.04]"
+        className="h-full border-border/40"
       >
         <GlassCardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -62,7 +62,7 @@ export function ApplicantApplicationCard({ application }: ApplicantApplicationCa
           </div>
         </GlassCardHeader>
         <GlassCardContent className="space-y-4 pt-0">
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/30 p-4">
             <div>
               <p className="text-sm font-semibold tracking-tight">Overall progress</p>
               <p className="text-[11px] text-muted-foreground/80 font-light mt-0.5">

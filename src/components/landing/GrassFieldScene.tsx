@@ -66,7 +66,13 @@ export function GrassFieldScene({ className = "", bladeCount = 6000 }: GrassFiel
     camera.position.set(0, 3.2, 7);
     camera.lookAt(0, 0.5, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (err) {
+      console.warn("Failed to create WebGL context for GrassFieldScene:", err);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);

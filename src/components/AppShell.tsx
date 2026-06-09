@@ -21,6 +21,7 @@ import { AppBackground } from "@/components/AppBackground";
 import { LandingLayout } from "@/components/LandingLayout";
 import { AppBreadcrumb } from "@/components/AppBreadcrumb";
 import { PortalBadge } from "@/components/PortalBadge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,9 +80,11 @@ export function AppShell() {
 
   const dockItems = nav.map((item) => {
     const Icon = item.icon;
+    const isActive = item.exact ? path === item.to : path.startsWith(item.to);
     return {
       icon: <Icon className="size-5" />,
       label: item.label,
+      active: isActive,
       onClick: () => {
         navigate({ to: item.to });
       },
@@ -103,7 +106,7 @@ export function AppShell() {
   }
 
   return (
-    <LandingLayout className="flex min-h-svh w-full pl-28">
+    <LandingLayout shader={false} className="flex min-h-svh w-full pl-28 authenticated-theme">
       <AppBackground className="flex min-h-svh flex-1 flex-col" nested>
         <Dock items={dockItems} />
         <header className="sticky top-0 z-20 flex h-16 shrink-0 flex-col justify-center gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl md:h-auto md:min-h-16 md:flex-row md:items-center md:gap-3 md:px-6 md:py-3">
@@ -135,6 +138,7 @@ export function AppShell() {
                 <Plus className="size-3.5" /> New case
               </Link>
             </Button>
+            <ThemeToggle />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon" className="relative shrink-0" asChild>

@@ -103,7 +103,7 @@ function ApplicantDashboard() {
 
         {!isLoading && applications.length > 0 && (
           <motion.section variants={itemVariants} className="space-y-4">
-            <h2 className="text-lg font-bold tracking-tight text-gradient bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent select-none pl-1">Your cases</h2>
+            <h2 className="text-lg font-bold tracking-tight text-foreground select-none pl-1">Your cases</h2>
             <div className="grid gap-5 lg:grid-cols-2">
               {applications.map((app) => (
                 <ApplicantApplicationCard key={app.id} application={app} />
@@ -113,7 +113,7 @@ function ApplicantDashboard() {
         )}
 
         <motion.div variants={itemVariants}>
-          <GlassCard className="p-6 border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+          <GlassCard className="p-6 border-border/40 shadow-glow">
             <VisaApplyOptions
               existingApplications={applications}
               onStarted={(app) => {

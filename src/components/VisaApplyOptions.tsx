@@ -250,8 +250,8 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
                 className={cn(
                   "p-4 text-left transition-all duration-300 h-full",
                   active
-                    ? "border-[var(--landing-accent)]/50 bg-white/[0.08] shadow-glow"
-                    : "bg-white/[0.02] border-white/5 opacity-90 hover:opacity-100",
+                    ? "border-primary bg-accent/40 shadow-glow"
+                    : "bg-muted/30 border-border/50 opacity-90 hover:opacity-100",
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -301,7 +301,7 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
               <SelectTrigger className="border-border/60 bg-muted/50 h-10 cursor-pointer">
                 <SelectValue placeholder="Code" />
               </SelectTrigger>
-              <SelectContent className="glass border-white/10 z-50">
+              <SelectContent className="glass border-border/50 z-50">
                 {countryCodes.map((c) => (
                   <SelectItem key={c.label} value={c.code} className="cursor-pointer">
                     {c.label}

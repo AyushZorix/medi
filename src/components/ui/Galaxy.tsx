@@ -217,11 +217,21 @@ export default function Galaxy({
   useEffect(() => {
     if (!ctnDom.current) return;
     const ctn = ctnDom.current;
-    const renderer = new Renderer({
-      alpha: transparent,
-      premultipliedAlpha: false
-    });
-    const gl = renderer.gl;
+    let renderer: Renderer;
+    let gl: WebGLRenderingContext | WebGL2RenderingContext;
+    try {
+      renderer = new Renderer({
+        alpha: transparent,
+        premultipliedAlpha: false
+      });
+      gl = renderer.gl;
+      if (!gl) {
+        throw new Error("WebGL context is null");
+      }
+    } catch (err) {
+      console.warn("Failed to create WebGL context for Galaxy:", err);
+      return;
+    }
 
     if (transparent) {
       gl.enable(gl.BLEND);

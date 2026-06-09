@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { cn } from "@/lib/utils";
 
 const glassCardVariants = cva(
-  "glass relative overflow-hidden transition-[border-color,box-shadow,transform] duration-300 hover:border-white/25",
+  "glass relative overflow-hidden transition-[border-color,box-shadow,transform] duration-300 hover:border-white/12",
   {
     variants: {
       intensity: {
@@ -50,7 +50,7 @@ function GlassCard({ className, intensity, children, ...props }: GlassCardProps)
         <div
           className="pointer-events-none absolute -inset-px rounded-xl opacity-100 transition-opacity duration-300 z-0"
           style={{
-            background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, color-mix(in oklch, var(--primary) 12%, transparent), transparent 80%)`,
+            background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, color-mix(in oklch, var(--primary) 8%, transparent), transparent 85%)`,
           }}
         />
       )}
@@ -59,7 +59,7 @@ function GlassCard({ className, intensity, children, ...props }: GlassCardProps)
         <div
           className="pointer-events-none absolute -inset-px rounded-xl opacity-100 transition-opacity duration-300 z-10"
           style={{
-            background: `radial-gradient(100px circle at ${coords.x}px ${coords.y}px, color-mix(in oklch, var(--primary) 35%, transparent), transparent 80%)`,
+            background: `radial-gradient(100px circle at ${coords.x}px ${coords.y}px, color-mix(in oklch, var(--primary) 25%, transparent), transparent 80%)`,
             border: "1px solid transparent",
             WebkitMask: "linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)",
             WebkitMaskComposite: "destination-out",

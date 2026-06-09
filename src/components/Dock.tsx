@@ -14,6 +14,7 @@ interface DockItemProps {
   distance: number;
   magnification: number;
   baseItemSize: number;
+  active?: boolean;
 }
 
 function DockItem({
@@ -25,6 +26,7 @@ function DockItem({
   distance,
   magnification,
   baseItemSize,
+  active,
 }: DockItemProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isHovered = useMotionValue(0);
@@ -56,7 +58,7 @@ function DockItem({
       onFocus={() => isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
-      className={`dock-item ${className}`}
+      className={`dock-item ${active ? "active" : ""} ${className}`}
       tabIndex={0}
       role="button"
       aria-haspopup="true"
@@ -67,6 +69,7 @@ function DockItem({
         }
         return child;
       })}
+      {active && <div className="dock-item-active-dot" />}
     </motion.div>
   );
 }
@@ -96,6 +99,7 @@ export interface DockItemData {
   label: string;
   onClick: () => void;
   className?: string;
+  active?: boolean;
 }
 
 export interface DockProps {
@@ -155,6 +159,7 @@ export default function Dock({
             distance={distance}
             magnification={magnification}
             baseItemSize={baseItemSize}
+            active={item.active}
           >
             <DockIcon>{item.icon}</DockIcon>
             <DockLabel>{item.label}</DockLabel>

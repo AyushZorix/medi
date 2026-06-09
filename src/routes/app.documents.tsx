@@ -261,11 +261,11 @@ function Documents() {
             ))}
           </div>
 
-          <GlassCard className="overflow-hidden p-0 border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+          <GlassCard className="overflow-hidden p-0 border-border/40 shadow-glow">
             <ScrollArea className="h-[min(520px,60vh)]">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/[0.05] hover:bg-transparent bg-white/[0.01]">
+                  <TableRow className="border-border/40 hover:bg-transparent bg-muted/20">
                     <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4 pl-6">Document Name</TableHead>
                     <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Applicant Case</TableHead>
                     <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Visa Category</TableHead>
@@ -289,10 +289,10 @@ function Documents() {
                     </TableRow>
                   ) : (
                     filteredDocs.map((d) => (
-                      <TableRow key={d.id} className="border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200">
+                      <TableRow key={d.id} className="border-border/40 hover:bg-muted/30 transition-colors duration-200">
                         <TableCell className="py-3 pl-6">
                           <div className="flex items-center gap-3">
-                            <div className="grid size-9 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.02] text-primary">
+                            <div className="grid size-9 place-items-center rounded-xl border border-border bg-muted/20 text-primary">
                               <FileText className="size-4" />
                             </div>
                             <div>
@@ -318,7 +318,7 @@ function Documents() {
                           <VisaBadge type={d.visa} />
                         </TableCell>
                         <TableCell className="py-3">
-                          <Badge variant="secondary" className="bg-white/[0.04] hover:bg-white/[0.04] text-xs font-light text-muted-foreground border border-white/[0.05] rounded-full px-2 py-0.5">{d.type}</Badge>
+                          <Badge variant="secondary" className="bg-muted/30 hover:bg-muted/40 text-xs font-light text-muted-foreground border border-border/40 rounded-full px-2 py-0.5">{d.type}</Badge>
                         </TableCell>
                         <TableCell className="py-3">
                           <StatusBadge status={statusMap[d.status] ?? "processing"}>
@@ -328,12 +328,12 @@ function Documents() {
                         <TableCell className="text-right py-3 pr-6">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="hover:bg-white/[0.05] rounded-lg">
+                              <Button variant="ghost" size="icon" className="hover:bg-muted rounded-lg">
                                 <MoreHorizontal className="size-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="glass">
-                              <DropdownMenuItem asChild className="focus:bg-white/[0.05] cursor-pointer">
+                              <DropdownMenuItem asChild className="focus:bg-muted cursor-pointer">
                                 <Link to="/app/applications/$id" params={{ id: d.applicationSlug }}>
                                   <Eye className="size-4 mr-2" /> View Case
                                 </Link>
@@ -465,7 +465,7 @@ function Documents() {
                 {analysis ? (
                   <>
                     {/* Header stats */}
-                    <div className="p-4 grid grid-cols-3 gap-4 text-center bg-white/[0.01]">
+                    <div className="p-4 grid grid-cols-3 gap-4 text-center bg-muted/10">
                       <div>
                         <span className="text-[10px] text-muted-foreground block uppercase">Corrected Angle</span>
                         <strong className="text-lg font-semibold">{analysis.bestRotation.angle}°</strong>

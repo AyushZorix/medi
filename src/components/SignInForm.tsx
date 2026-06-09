@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Briefcase, Loader2, Sparkles, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +56,7 @@ function PortalPicker({
   disabled?: boolean;
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="relative flex rounded-xl bg-muted/30 p-1 border border-border/60 shadow-inner">
       {portalOptions.map((opt) => {
         const Icon = opt.icon;
         const active = value === opt.id;
@@ -66,25 +67,22 @@ function PortalPicker({
             disabled={disabled}
             onClick={() => onChange(opt.id)}
             className={cn(
-              "landing-card rounded-xl p-4 text-left transition-all",
+              "relative flex flex-1 items-center justify-center gap-2.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-300 select-none cursor-pointer z-10",
               active
-                ? "border-[var(--landing-accent)]/50 shadow-glow"
-                : "opacity-90 hover:opacity-100",
-              disabled && "pointer-events-none opacity-60",
+                ? "text-white"
+                : "text-muted-foreground hover:text-foreground",
+              disabled && "pointer-events-none opacity-50",
             )}
           >
-            <div className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "grid size-9 place-items-center rounded-lg",
-                  active ? "bg-gradient-aurora text-primary-foreground" : "bg-muted",
-                )}
-              >
-                <Icon className="size-4" />
-              </div>
-              <span className="text-sm font-medium">{opt.title}</span>
-            </div>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{opt.description}</p>
+            {active && (
+              <motion.div
+                layoutId="active-portal-pill"
+                className="absolute inset-0 bg-gradient-aurora rounded-lg -z-10 shadow-glow"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
+            )}
+            <Icon className="size-4 shrink-0" />
+            <span>{opt.title}</span>
           </button>
         );
       })}
@@ -195,15 +193,15 @@ export function SignInForm({
       <GlassCardContent className="space-y-5">
         {!portalLocked && (
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Portal</Label>
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/85 font-semibold">Select Portal Access</Label>
             <PortalPicker value={portal} onChange={setPortal} disabled={loading} />
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "sign_up" && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full name</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="fullName" className="text-xs text-muted-foreground/80 font-medium">Full name</Label>
               <Input
                 id="fullName"
                 type="text"
@@ -211,12 +209,12 @@ export function SignInForm({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="border-border/60 bg-muted/50"
+                className="h-10 border-border/80 bg-muted/20 hover:border-border transition-all rounded-lg text-sm px-3.5"
               />
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-xs text-muted-foreground/80 font-medium">Email address</Label>
             <Input
               id="email"
               type="email"
@@ -225,11 +223,11 @@ export function SignInForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border-border/60 bg-muted/50"
+              className="h-10 border-border/80 bg-muted/20 hover:border-border transition-all rounded-lg text-sm px-3.5"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="text-xs text-muted-foreground/80 font-medium">Password</Label>
             <Input
               id="password"
               type="password"
@@ -239,11 +237,11 @@ export function SignInForm({
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="border-border/60 bg-muted/50"
+              className="h-10 border-border/80 bg-muted/20 hover:border-border transition-all rounded-lg text-sm px-3.5"
             />
           </div>
-          <Button type="submit" variant="gradient" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="size-4 animate-spin" />}
+          <Button type="submit" variant="gradient" className="w-full h-10 mt-2 font-medium rounded-lg active:scale-[0.985] transition-all cursor-pointer" disabled={loading}>
+            {loading && <Loader2 className="size-4 animate-spin mr-1.5" />}
             {mode === "sign_in" ? "Sign in" : "Create account"}
           </Button>
         </form>
