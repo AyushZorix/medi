@@ -126,10 +126,10 @@ function DecisionTable({ rows }: { rows: any[] }) {
           className="max-w-sm h-10 border-border/60 bg-muted/40"
         />
       </div>
-      <GlassCard className="overflow-hidden p-0 border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+      <GlassCard className="overflow-hidden p-0 border-border/40 shadow-glow">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/[0.05] hover:bg-transparent bg-white/[0.01]">
+            <TableRow className="border-border/40 hover:bg-transparent bg-muted/20">
               <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4 pl-6">Applicant Name</TableHead>
               <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Visa Category</TableHead>
               <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Status</TableHead>
@@ -147,7 +147,7 @@ function DecisionTable({ rows }: { rows: any[] }) {
               </TableRow>
             ) : (
               filteredRows.map((r) => (
-                <TableRow key={r.id} className="border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200">
+                <TableRow key={r.id} className="border-border/40 hover:bg-muted/30 transition-colors duration-200">
                   <TableCell className="py-3.5 pl-6">
                     <Link
                       to="/app/applications/$id"

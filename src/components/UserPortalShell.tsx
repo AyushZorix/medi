@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { AppBackground } from "@/components/AppBackground";
 import { LandingLayout } from "@/components/LandingLayout";
 import { PortalBadge } from "@/components/PortalBadge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,9 +76,11 @@ export function UserPortalShell() {
 
   const dockItems = nav.map((item) => {
     const Icon = item.icon;
+    const isActive = item.exact ? path === item.to : path.startsWith(item.to);
     return {
       icon: <Icon className="size-5" />,
       label: item.label,
+      active: isActive,
       onClick: () => {
         navigate({ to: item.to });
       },
@@ -99,7 +102,7 @@ export function UserPortalShell() {
   }
 
   return (
-    <LandingLayout className="flex min-h-svh w-full pl-28">
+    <LandingLayout shader={false} className="flex min-h-svh w-full pl-28 authenticated-theme">
       <AppBackground className="flex min-h-svh flex-1 flex-col" nested>
         <Dock items={dockItems} />
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl md:px-6">
@@ -113,6 +116,7 @@ export function UserPortalShell() {
             <PortalBadge portal="applicant" />
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button variant="outline" size="icon" className="relative shrink-0" asChild>
               <Link to="/portal/messages">
                 <Bell className="size-4" />

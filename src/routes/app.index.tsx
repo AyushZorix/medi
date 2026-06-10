@@ -123,11 +123,11 @@ export function Dashboard() {
 
         {needsReview > 0 && (
           <motion.div variants={itemVariants}>
-            <Alert className="glass border-warning/25 bg-warning/[0.03] text-warning-foreground shadow-[0_0_20px_rgba(245,158,11,0.03)]">
-              <AlertTitle className="font-semibold tracking-wide">
+            <Alert className="glass border-warning/20 bg-warning/[0.03] text-warning-foreground shadow-[0_0_24px_rgba(245,158,11,0.06)]">
+              <AlertTitle className="font-bold text-base tracking-wide">
                 {needsReview} case{needsReview === 1 ? "" : "s"} require attorney review
               </AlertTitle>
-              <AlertDescription className="text-xs text-muted-foreground/90 font-light mt-1">
+              <AlertDescription className="text-sm text-muted-foreground/95 font-medium mt-1.5 leading-relaxed">
                 Open the applications queue to review documents, process details, and execute the AI pipeline check.
               </AlertDescription>
             </Alert>
@@ -147,26 +147,26 @@ export function Dashboard() {
 
         <div className="grid gap-6 lg:grid-cols-3">
           <motion.div variants={itemVariants} className="lg:col-span-2">
-            <GlassCard className="h-full border-white/[0.04]">
-              <GlassCardHeader className="pb-4">
+            <GlassCard className="h-full border-border/40">
+              <GlassCardHeader className="pb-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <GlassCardTitle className="text-lg font-bold">Recent cases</GlassCardTitle>
-                    <GlassCardDescription className="text-xs font-light">Latest applications and pipeline reviews</GlassCardDescription>
+                    <GlassCardTitle className="text-xl font-extrabold tracking-tight text-foreground">Recent cases</GlassCardTitle>
+                    <GlassCardDescription className="text-sm font-medium text-muted-foreground/80 mt-1">Latest applications and pipeline reviews</GlassCardDescription>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 bg-white/[0.02] border border-white/[0.05] rounded-full px-2.5 py-1">
-                    <span className="size-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_var(--color-success)]" />
+                  <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-success bg-success/15 border border-success/30 rounded-full px-3 py-1">
+                    <span className="size-2 rounded-full bg-success animate-pulse shadow-[0_0_10px_var(--color-success)]" />
                     Live pipeline
                   </div>
                 </div>
               </GlassCardHeader>
               <GlassCardContent className="pt-0">
-                <div className="space-y-1">
+                <div className="space-y-3">
                   {isLoading && (
-                    <p className="py-8 text-center text-sm text-muted-foreground">Loading applications…</p>
+                    <p className="py-8 text-center text-base text-muted-foreground">Loading applications…</p>
                   )}
                   {!isLoading && feed.length === 0 && (
-                    <p className="py-8 text-center text-sm text-muted-foreground">No applications in queue yet.</p>
+                    <p className="py-8 text-center text-base text-muted-foreground">No applications in queue yet.</p>
                   )}
                   {feed.map((f) => (
                     <motion.div
@@ -180,22 +180,22 @@ export function Dashboard() {
                       <Link
                         to="/app/applications/$id"
                         params={{ id: f.slug }}
-                        className="-mx-2 flex items-center gap-4 rounded-xl px-3 py-3 bg-transparent hover:bg-white/[0.02] border border-transparent hover:border-white/[0.04] transition-all duration-200"
+                        className="flex items-center gap-4 rounded-xl px-5 py-4 bg-muted/20 hover:bg-muted/30 border border-border/40 hover:border-border/60 shadow-sm transition-all duration-200"
                       >
-                        <Avatar className="size-9 border border-white/[0.08]">
-                          <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
+                        <Avatar className="size-10 border border-border/50">
+                          <AvatarFallback className="bg-gradient-primary text-sm font-bold text-primary-foreground">
                             {f.applicantName.split(" ").map((n) => n[0]).join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium tracking-tight">
+                          <div className="truncate text-base font-bold tracking-tight text-foreground">
                             {f.applicantName}
                           </div>
-                          <div className="text-[11px] text-muted-foreground/80 font-light mt-0.5">Updated {f.updated}</div>
+                          <div className="text-xs text-muted-foreground/85 font-medium mt-1">Updated {f.updated}</div>
                         </div>
                         <VisaBadge type={f.visaType} />
-                        <div className="hidden w-24 sm:block select-none">
-                          <div className="mb-1 text-[10px] text-muted-foreground font-light">Confidence {f.score}%</div>
+                        <div className="hidden w-28 sm:block select-none">
+                          <div className="mb-1.5 text-xs text-muted-foreground/80 font-bold uppercase tracking-wider">Confidence {f.score}%</div>
                           <ScoreBar value={f.score} />
                         </div>
                         <StatusBadge status={f.status} />
@@ -208,19 +208,19 @@ export function Dashboard() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <GlassCard className="h-full border-white/[0.04]">
-              <GlassCardHeader className="pb-4">
+            <GlassCard className="h-full border-border/40">
+              <GlassCardHeader className="pb-5">
                 <div className="flex items-center justify-between">
-                  <GlassCardTitle className="text-base font-bold">Pipeline analytics</GlassCardTitle>
-                  <Activity className="size-4 text-primary animate-pulse" />
+                  <GlassCardTitle className="text-lg font-extrabold tracking-tight text-foreground">Pipeline analytics</GlassCardTitle>
+                  <Activity className="size-5 text-primary animate-pulse" />
                 </div>
               </GlassCardHeader>
-              <GlassCardContent className="space-y-4.5 pt-0">
+              <GlassCardContent className="space-y-5 pt-0">
                 {processingSteps.map((s) => (
-                  <div key={s.label} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-light">
+                  <div key={s.label} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm font-semibold text-foreground/90">
                       <span>{s.label}</span>
-                      <span className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">{s.status}</span>
+                      <span className="text-muted-foreground/90 text-xs font-extrabold uppercase tracking-wider">{s.status}</span>
                     </div>
                     <ScoreBar
                       value={s.val}
@@ -228,11 +228,11 @@ export function Dashboard() {
                     />
                   </div>
                 ))}
-                <Separator className="bg-white/[0.05] my-2" />
-                <div className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground select-none">AI Confidence rating</div>
-                <div className="flex items-baseline gap-2">
-                  <div className="text-3xl font-bold tracking-tight text-gradient">{avgScore}</div>
-                  <div className="text-[10px] text-success font-medium bg-success/10 border border-success/20 px-2 py-0.5 rounded-full">
+                <Separator className="bg-white/[0.05] my-3" />
+                <div className="text-xs font-bold tracking-widest uppercase text-muted-foreground/80 select-none">AI Confidence rating</div>
+                <div className="flex items-baseline gap-2.5 mt-1">
+                  <div className="text-4xl font-extrabold tracking-tight text-gradient">{avgScore}</div>
+                  <div className="text-xs text-success font-semibold bg-success/15 border border-success/30 px-3 py-1 rounded-full shadow-[0_0_8px_rgba(72,187,120,0.1)]">
                     Average Score
                   </div>
                 </div>

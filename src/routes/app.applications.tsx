@@ -154,60 +154,60 @@ function Applications() {
         </Button>
       </div>
 
-      <GlassCard className="overflow-hidden p-0 border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+      <GlassCard className="overflow-hidden p-0 border-border/40 shadow-glow hover:border-primary/30 transition-all duration-300">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/[0.05] hover:bg-transparent bg-white/[0.01]">
-              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4 pl-6">Applicant</TableHead>
-              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Visa Category</TableHead>
-              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">Processing Status</TableHead>
-              <TableHead className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4">AI Score</TableHead>
-              <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 py-4 pr-6">Updated</TableHead>
+            <TableRow className="border-border/40 hover:bg-transparent bg-muted/20">
+              <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground py-4 pl-6">Applicant</TableHead>
+              <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground py-4">Visa Category</TableHead>
+              <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground py-4">Processing Status</TableHead>
+              <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground py-4">AI Score</TableHead>
+              <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground py-4 pr-6">Updated</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={5} className="py-12 text-center text-base text-muted-foreground">
                   Loading applications queue…
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && filteredRows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={5} className="py-12 text-center text-base text-muted-foreground">
                   No matching applications found.
                 </TableCell>
               </TableRow>
             )}
             {filteredRows.map((r) => (
-              <TableRow key={r.id} className="border-white/[0.04] hover:bg-white/[0.02] transition-colors duration-200">
-                <TableCell className="py-3.5 pl-6">
+              <TableRow key={r.id} className="border-border/40 hover:bg-muted/30 transition-colors duration-200">
+                <TableCell className="py-4 pl-6">
                   <button
                     onClick={() => setSelectedApp(r)}
-                    className="flex items-center gap-3 font-semibold hover:text-primary text-left transition-colors duration-200 cursor-pointer"
+                    className="flex items-center gap-3 font-bold hover:text-primary text-left text-sm md:text-base transition-colors duration-200 cursor-pointer"
                   >
-                    <Avatar className="size-8 border border-white/[0.08]">
-                      <AvatarFallback className="bg-gradient-primary text-[11px] font-bold text-primary-foreground">
+                    <Avatar className="size-9 border border-border/50">
+                      <AvatarFallback className="bg-gradient-primary text-xs font-bold text-primary-foreground">
                         {r.applicantName.split(" ").map((n) => n[0]).join("")}
                       </AvatarFallback>
                     </Avatar>
                     {r.applicantName}
                   </button>
                 </TableCell>
-                <TableCell className="py-3.5">
+                <TableCell className="py-4">
                   <VisaBadge type={r.visaType} />
                 </TableCell>
-                <TableCell className="py-3.5">
+                <TableCell className="py-4">
                   <StatusBadge status={r.status} />
                 </TableCell>
-                <TableCell className="py-3.5">
+                <TableCell className="py-4">
                   <div className="flex items-center gap-2.5">
-                    <ScoreBar value={r.score} className="w-16" />
-                    <span className="text-xs tabular-nums text-muted-foreground font-medium">{r.score}%</span>
+                    <ScoreBar value={r.score} className="w-20" />
+                    <span className="text-sm tabular-nums text-muted-foreground/90 font-bold">{r.score}%</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-right text-xs text-muted-foreground/80 py-3.5 pr-6 font-light">{r.updated}</TableCell>
+                <TableCell className="text-right text-sm text-muted-foreground/95 py-4 pr-6 font-semibold">{r.updated}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -216,9 +216,9 @@ function Applications() {
 
       {/* Case Details Slide-over Sheet */}
       <Sheet open={!!selectedApp} onOpenChange={(open) => !open && setSelectedApp(null)}>
-        <SheetContent className="glass border-white/10 w-[550px] sm:max-w-[550px] overflow-y-auto z-50 flex flex-col h-full bg-black/95 text-white">
-          <SheetHeader className="shrink-0 pb-4 border-b border-white/10 mt-4">
-            <SheetTitle className="text-white hidden">Applicant Case Profile</SheetTitle>
+        <SheetContent className="glass border-border/40 w-[550px] sm:max-w-[550px] overflow-y-auto z-50 flex flex-col h-full bg-background text-foreground">
+          <SheetHeader className="shrink-0 pb-4 border-b border-border/50 mt-4">
+            <SheetTitle className="text-foreground hidden">Applicant Case Profile</SheetTitle>
             <SheetDescription className="hidden">Detailed submitted checklist and calls console</SheetDescription>
           </SheetHeader>
           
@@ -227,43 +227,43 @@ function Applications() {
               {/* Profile Header */}
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <Avatar className="size-12 border border-white/[0.08]">
-                    <AvatarFallback className="bg-gradient-primary text-[14px] font-bold text-primary-foreground">
+                  <Avatar className="size-14 border border-border/60">
+                    <AvatarFallback className="bg-gradient-primary text-base font-bold text-primary-foreground">
                       {selectedApp.applicantName.split(" ").map((n) => n[0]).join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-xl font-extrabold text-foreground flex items-center gap-2">
                       {selectedApp.applicantName}
                       <VisaBadge type={selectedApp.visaType} />
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground/80 mt-1">
                       Case slug: {selectedApp.slug}
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-col items-end gap-2">
                   <StatusBadge status={selectedApp.status} />
-                  <Button variant="glass" size="sm" asChild className="h-7 text-[10px] cursor-pointer">
+                  <Button variant="glass" size="sm" asChild className="h-8 text-xs cursor-pointer px-3">
                     <Link to="/app/applications/$id" params={{ id: selectedApp.slug }}>
-                      <ExternalLink className="size-3 mr-1" /> View Full Case
+                      <ExternalLink className="size-3.5 mr-1" /> View Full Case
                     </Link>
                   </Button>
                 </div>
               </div>
 
               {/* Stats Card */}
-              <div className="grid grid-cols-2 gap-3 bg-white/[0.02] border border-white/5 rounded-xl p-3.5">
-                <div className="text-center border-r border-white/5">
-                  <span className="text-[10px] text-muted-foreground uppercase block">AI Verification Score</span>
-                  <div className="flex items-center justify-center gap-2 mt-1">
-                    <Brain className="size-4 text-primary animate-pulse" />
-                    <strong className="text-lg font-semibold">{selectedApp.score}%</strong>
+              <div className="grid grid-cols-2 gap-4 bg-muted/20 border border-border/40 rounded-xl p-4">
+                <div className="text-center border-r border-border/40">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">AI Verification Score</span>
+                  <div className="flex items-center justify-center gap-2.5 mt-2">
+                    <Brain className="size-5 text-primary animate-pulse" />
+                    <strong className="text-xl font-bold text-foreground">{selectedApp.score}%</strong>
                   </div>
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] text-muted-foreground uppercase block">Documents Submitted</span>
-                  <strong className="text-lg font-semibold mt-1 block">
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Documents Submitted</span>
+                  <strong className="text-xl font-bold text-foreground mt-2 block">
                     {selectedApp.documentsSummary?.mandatoryUploaded ?? 0} / {selectedApp.documentsSummary?.mandatoryTotal ?? 0}
                   </strong>
                 </div>
@@ -271,24 +271,24 @@ function Applications() {
 
               {/* Call Section */}
               {selectedApp.phoneNumber ? (
-                <div className="bg-primary/5 border border-primary/25 rounded-xl p-4 space-y-3">
-                  <h4 className="text-sm font-semibold flex items-center gap-2 text-primary">
-                    <Phone className="size-4" /> Call Applicant
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 space-y-4">
+                  <h4 className="text-base font-bold flex items-center gap-2 text-primary">
+                    <Phone className="size-4.5" /> Call Applicant
                   </h4>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                       Outbound call script
                     </Label>
                     <Textarea
                       value={callScript}
                       onChange={(e) => setCallScript(e.target.value)}
                       rows={3}
-                      className="bg-black/30 border-white/10 text-xs font-sans leading-relaxed"
+                      className="bg-muted/30 border-border/50 text-sm font-sans leading-relaxed text-foreground rounded-xl"
                     />
                   </div>
                   <Button
                     variant="gradient"
-                    className="w-full flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 cursor-pointer h-10 text-sm font-semibold"
                     disabled={callMutation.isPending || !callScript.trim()}
                     onClick={() => callMutation.mutate()}
                   >
@@ -301,33 +301,33 @@ function Applications() {
                   </Button>
                 </div>
               ) : (
-                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 text-xs text-muted-foreground">
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 text-sm font-medium text-muted-foreground">
                   No registered phone number available for outbound calls.
                 </div>
               )}
 
               {/* Documents & OCR List */}
-              <div className="flex-1 space-y-3 min-h-0 flex flex-col">
-                <h4 className="text-sm font-semibold flex items-center gap-2 text-white shrink-0">
-                  <FileText className="size-4 text-primary" /> Submitted Documents & OCR Extracted Text
+              <div className="flex-1 space-y-4 min-h-0 flex flex-col">
+                <h4 className="text-base font-bold flex items-center gap-2 text-foreground shrink-0">
+                  <FileText className="size-4.5 text-primary" /> Submitted Documents & OCR Extracted Text
                 </h4>
                 <ScrollArea className="flex-1 pr-2">
-                  <div className="space-y-3 pb-6">
+                  <div className="space-y-4 pb-6">
                     {selectedApp.documents.map((doc) => {
                       const uploaded = doc.status !== "missing" && Boolean(doc.fileName);
                       return (
-                        <div key={doc.docId} className="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-2.5">
+                        <div key={doc.docId} className="bg-muted/10 border border-border/40 rounded-xl p-4 space-y-3">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               {uploaded ? (
-                                <CheckCircle2 className="size-4 text-success shrink-0" />
+                                <CheckCircle2 className="size-5 text-success shrink-0" />
                               ) : (
-                                <FileText className="size-4 text-muted-foreground shrink-0" />
+                                <FileText className="size-5 text-muted-foreground shrink-0" />
                               )}
                               <div>
-                                <p className="text-xs font-semibold truncate max-w-[250px]">{doc.label}</p>
+                                <p className="text-sm font-bold truncate max-w-[250px]">{doc.label}</p>
                                 {uploaded && (
-                                  <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">
+                                  <p className="text-xs text-muted-foreground/80 truncate max-w-[200px] mt-0.5">
                                     File: {doc.fileName}
                                   </p>
                                 )}
@@ -339,11 +339,11 @@ function Applications() {
                           </div>
 
                           {uploaded && (
-                            <div className="space-y-1 border-t border-white/[0.04] pt-2">
-                              <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider block">
+                            <div className="space-y-2 border-t border-border/40 pt-2">
+                              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
                                 Extracted text data
                               </span>
-                              <div className="bg-black/40 border border-white/[0.05] rounded-lg p-2.5 text-xs font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[140px] overflow-y-auto leading-relaxed select-all">
+                              <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[160px] overflow-y-auto leading-relaxed select-all">
                                 {doc.notes || doc.extractedText || "OCR check has not been run or extracted no text."}
                               </div>
                             </div>

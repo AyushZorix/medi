@@ -15,18 +15,18 @@ type PageHeaderProps = {
 
 export function PageHeader({ eyebrow, title, description, actions, portal, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex flex-wrap items-end justify-between gap-4 pb-2 border-b border-white/[0.05]", className)}>
-      <div className="space-y-2.5">
+    <div className={cn("flex flex-wrap items-end justify-between gap-4 pb-2 border-b border-border/40", className)}>
+      <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           {portal && <PortalBadge portal={portal} className="shadow-sm" />}
           {eyebrow && (
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/80">{eyebrow}</span>
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary/95">{eyebrow}</span>
           )}
         </div>
-        <h1 className="text-2xl font-bold tracking-tight md:text-4xl font-display bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent select-none">
+        <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl font-display text-foreground select-none bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent pb-1">
           {title}
         </h1>
-        {description && <p className="max-w-2xl text-sm text-muted-foreground/90 leading-relaxed font-light">{description}</p>}
+        {description && <p className="max-w-2xl text-base text-muted-foreground/95 leading-relaxed font-medium mt-1">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-3 pb-1">{actions}</div>}
     </div>

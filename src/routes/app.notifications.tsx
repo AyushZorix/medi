@@ -43,7 +43,7 @@ function NotificationList({ items, filter }: { items: any[]; filter?: "email" | 
               key={i.id}
               type="button"
               onClick={() => toast.success(i.title, { description: i.body })}
-              className={`relative flex w-full gap-4 rounded-xl border border-transparent p-4 text-left transition hover:border-border/40 hover:bg-white/[0.03] ${i.unread ? "border-primary/20 bg-primary/5" : ""}`}
+              className={`relative flex w-full gap-4 rounded-xl border border-transparent p-4 text-left transition hover:border-border/40 hover:bg-muted/30 ${i.unread ? "border-primary/20 bg-primary/5" : ""}`}
             >
               <div className="relative z-10 grid size-10 shrink-0 place-items-center rounded-full border border-border/60 glass">
                 <Icon className="size-4 text-primary" />

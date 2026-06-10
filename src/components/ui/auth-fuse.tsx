@@ -159,7 +159,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-foreground shadow-sm shadow-black/5 transition-all placeholder:text-muted-foreground/50 focus-visible:bg-white/[0.05] focus-visible:border-[var(--landing-accent)] focus-visible:ring-1 focus-visible:ring-[var(--landing-accent)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-10 w-full rounded-lg border border-border bg-muted/20 px-3 py-3 text-sm text-foreground shadow-sm shadow-black/5 transition-all placeholder:text-muted-foreground/50 focus-visible:bg-muted/40 focus-visible:border-[var(--landing-accent)] focus-visible:ring-1 focus-visible:ring-[var(--landing-accent)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         ref={ref}
@@ -227,8 +227,8 @@ function PortalPicker({
             className={cn(
               "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer",
               active
-                ? "border-[var(--landing-accent)] bg-white/10 text-white shadow-[0_0_15px_rgba(124,58,237,0.15)]"
-                : "border-white/5 bg-white/[0.02] text-muted-foreground hover:text-white hover:bg-white/[0.05]",
+                ? "border-primary bg-primary text-primary-foreground shadow-glow"
+                : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
               disabled && "pointer-events-none opacity-50"
             )}
           >
@@ -265,7 +265,7 @@ function SignInForm({
   return (
     <form onSubmit={onSubmit} autoComplete="on" className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.03)]">
+        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-muted/40 border border-border/80 shadow-glow">
           <svg
             width="32"
             height="32"
@@ -282,7 +282,7 @@ function SignInForm({
             <polyline points="2 8.5 12 12" />
           </svg>
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-white mt-1">Sign in to VisaIQ</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground mt-1">Sign in to VisaIQ</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Sign in to your ${portal === "attorney" ? "attorney" : "applicant"} portal`
@@ -377,7 +377,7 @@ function SignUpForm({
   return (
     <form onSubmit={onSubmit} autoComplete="on" className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.03)]">
+        <div className="relative flex size-14 items-center justify-center rounded-2xl bg-muted/40 border border-border/80 shadow-glow">
           <svg
             width="32"
             height="32"
@@ -394,7 +394,7 @@ function SignUpForm({
             <polyline points="2 8.5 12 12" />
           </svg>
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-white mt-1">Create your account</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground mt-1">Create your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
           {portalLocked
             ? `Create your ${portal === "attorney" ? "attorney" : "applicant"} account`
@@ -463,8 +463,8 @@ function SignUpForm({
                     className={cn(
                       "rounded-lg border px-3 py-2 text-xs font-medium transition-all",
                       active
-                        ? "border-[var(--landing-accent)] bg-white/10 text-white"
-                        : "border-white/10 bg-white/[0.02] text-muted-foreground hover:text-white",
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
                       loading && "pointer-events-none opacity-50",
                     )}
                   >
@@ -781,7 +781,7 @@ export function AuthUI({ portalLock, search }: AuthUIProps) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{ scale: 1.005 }}
-        className="w-full max-w-[450px] px-8 py-10 rounded-3xl border border-white/[0.08] bg-black/55 backdrop-blur-3xl shadow-[0_0_50px_rgba(124,58,237,0.06)] relative z-10 overflow-hidden transition-all duration-300"
+        className="w-full max-w-[450px] px-8 py-10 rounded-3xl border border-border/60 bg-card/85 backdrop-blur-3xl shadow-glow relative z-10 overflow-hidden transition-all duration-300"
       >
         {/* Subtle inner background glow */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-transparent pointer-events-none" />

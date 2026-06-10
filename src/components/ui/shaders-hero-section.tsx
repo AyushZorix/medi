@@ -12,6 +12,7 @@ interface ShaderBackgroundProps {
 export function ShaderBackground({ children }: ShaderBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isActive, setIsActive] = useState(false)
+  const [isDark, setIsDark] = useState(true)
 
   useEffect(() => {
     const handleMouseEnter = () => setIsActive(true)
@@ -23,56 +24,72 @@ export function ShaderBackground({ children }: ShaderBackgroundProps) {
       container.addEventListener("mouseleave", handleMouseLeave)
     }
 
+    // Observe document element classes to react to theme changes
+    const checkDark = () => {
+      setIsDark(document.documentElement.classList.contains("dark"))
+    }
+    checkDark()
+    const observer = new MutationObserver(checkDark)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    })
+
     return () => {
       if (container) {
         container.removeEventListener("mouseenter", handleMouseEnter)
         container.removeEventListener("mouseleave", handleMouseLeave)
       }
+      observer.disconnect()
     }
   }, [])
 
   return (
-    <div ref={containerRef} className="min-h-screen w-full relative overflow-hidden bg-[#050515]">
-      {/* SVG Filters */}
-      <svg className="absolute inset-0 w-0 h-0">
-        <defs>
-          <filter id="glass-effect" x="-50%" y="-50%" width="200%" height="200%">
-            <feTurbulence baseFrequency="0.005" numOctaves="1" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.3" />
-            <feColorMatrix
-              type="matrix"
-              values="1 0 0 0 0.02
-                      0 1 0 0 0.02
-                      0 0 1 0 0.05
-                      0 0 0 0.9 0"
-              result="tint"
-            />
-          </filter>
-          <filter id="gooey-filter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
-              result="gooey"
-            />
-            <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
-          </filter>
-        </defs>
-      </svg>
+    <div ref={containerRef} className="min-h-screen w-full relative overflow-hidden bg-background">
+      {isDark && (
+        <>
+          {/* SVG Filters */}
+          <svg className="absolute inset-0 w-0 h-0">
+            <defs>
+              <filter id="glass-effect" x="-50%" y="-50%" width="200%" height="200%">
+                <feTurbulence baseFrequency="0.005" numOctaves="1" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.3" />
+                <feColorMatrix
+                  type="matrix"
+                  values="1 0 0 0 0.02
+                          0 1 0 0 0.02
+                          0 0 1 0 0.05
+                          0 0 0 0.9 0"
+                  result="tint"
+                />
+              </filter>
+              <filter id="gooey-filter" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                <feColorMatrix
+                  in="blur"
+                  mode="matrix"
+                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+                  result="gooey"
+                />
+                <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
+              </filter>
+            </defs>
+          </svg>
 
-      {/* Background Shaders */}
-      <MeshGradient
-        className="absolute inset-0 w-full h-full"
-        colors={["#050515", "#120a2b", "#22084c", "#0a1835", "#030206"]}
-        speed={0.15}
-      />
-      <MeshGradient
-        className="absolute inset-0 w-full h-full opacity-35"
-        colors={["#000000", "#402080", "#083f70", "#000000"]}
-        speed={0.1}
-        wireframe="true"
-      />
+          {/* Background Shaders */}
+          <MeshGradient
+            className="absolute inset-0 w-full h-full"
+            colors={["#050515", "#120a2b", "#22084c", "#0a1835", "#030206"]}
+            speed={0.15}
+          />
+          <MeshGradient
+            className="absolute inset-0 w-full h-full opacity-35"
+            colors={["#000000", "#402080", "#083f70", "#000000"]}
+            speed={0.1}
+            wireframe="true"
+          />
+        </>
+      )}
 
       {children}
     </div>

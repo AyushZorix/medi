@@ -38,7 +38,7 @@ export function enrichApplication(application) {
   const mandatoryUploaded = documents.filter((d) => d.required && d.fileName).length;
 
   return {
-    id: application._id?.toString?.() ?? String(application.id ?? ""),
+    id: application.id ?? String(application.id ?? ""),
     slug: application.slug,
     applicantName: application.applicantName,
     visaType: application.visaType,
@@ -61,98 +61,159 @@ export function enrichApplication(application) {
     canRunPipeline: allMandatoryUploaded(documents) && application.pipeline?.status !== "running",
     submittedToAttorney: application.submittedToAttorney ?? false,
     submittedAt: application.submittedAt || null,
+    // Attorney join
+    attorneyUserId: application.attorney_user_id ?? null,
+    attorneyName: application.attorney_name ?? null,
+    forwardedToAttorney: Boolean(application.attorney_user_id),
   };
 }
 
-export async function syncApplicationProgress(application) {
+/**
+ * Recomputes documents + progress and returns the new field values as a plain object.
+ * The caller is responsible for doing the Supabase UPDATE.
+ */
+export function buildProgressUpdate(application) {
   const documents = buildDocumentChecklist(application.visaType, application.documents);
-  application.documents = documents;
-  application.markModified("documents");
-
-  application.progress = computeProgress(application, documents);
-  const p = application.progress;
-  application.score = Math.round(
-    (p.documentsReceived + p.identityVerification + p.financialReview) / 3,
+  const progress = computeProgress(application, documents);
+  const p = progress;
+  const score = Math.round(
+    (p.documentsReceived + p.identityVerification + p.financialReview) / 3
   );
-  application.markModified("progress");
-  application.markModified("pipeline");
-  application.markModified("humanReview");
-  application.updatedLabel = "just now";
-  await application.save();
-  return application;
+  return { documents, progress, score };
 }
 
-/** Runs the AI pipeline when all mandatory docs are uploaded and it has not run yet. */
-export async function maybeAutoRunPipeline(application) {
+/** Runs the AI pipeline when all mandatory docs are uploaded. */
+export async function maybeAutoRunPipeline(application, supabase) {
   const documents = buildDocumentChecklist(application.visaType, application.documents);
   if (allMandatoryUploaded(documents)) {
-    return await runPipelineForApplication(application);
+    return await runPipelineForApplication(application, supabase);
   }
   return application;
 }
 
-export async function runPipelineForApplication(application) {
-  application.pipeline = { status: "running", ranAt: new Date() };
-  application.markModified("pipeline");
-  await application.save();
+export async function runPipelineForApplication(application, supabase) {
+  // Mark pipeline as running
+  const runningPipeline = { status: "running", ranAt: new Date().toISOString() };
+  await supabase
+    .from("applications")
+    .update({ pipeline: runningPipeline })
+    .eq("id", application.id);
 
-  const pipeline = await runAgentPipeline(application);
-  application.pipeline = pipeline;
-  application.markModified("pipeline");
-  application.status = "needs_info";
-  if (pipeline.decider?.recommendation === "approve") {
-    application.status = "processing";
-  } else if (pipeline.decider?.recommendation === "deny") {
-    application.status = "needs_info";
-  }
+  const pipelineResult = await runAgentPipeline(application);
 
-  application.humanReview = {
+  let newStatus = "needs_info";
+  if (pipelineResult.decider?.recommendation === "approve") newStatus = "processing";
+  else if (pipelineResult.decider?.recommendation === "deny") newStatus = "needs_info";
+
+  const newHumanReview = {
     status: "pending",
     reviewedBy: null,
     reviewedAt: null,
     attorneyNotes: "",
   };
-  application.markModified("humanReview");
 
-  await syncApplicationProgress(application);
-  return application;
+  // Build updated application object for progress computation
+  const updated = {
+    ...application,
+    pipeline: pipelineResult,
+    humanReview: newHumanReview,
+    status: newStatus,
+  };
+
+  const { documents, progress, score } = buildProgressUpdate(updated);
+
+  const { data: saved, error } = await supabase
+    .from("applications")
+    .update({
+      pipeline: pipelineResult,
+      human_review: newHumanReview,
+      status: newStatus,
+      documents,
+      progress,
+      score,
+      updated_label: "just now",
+    })
+    .eq("id", application.id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+
+  return { ...saved, attorney_name: application.attorney_name };
 }
 
-export async function submitHumanReview(application, { approved, attorneyNotes, attorneyUserId }) {
+export async function submitHumanReview(application, { approved, attorneyNotes, attorneyUserId }, supabase) {
   const pipeline = application.pipeline || {};
   const aiReasons = pipeline.decider?.reasons || [];
 
-  application.humanReview = {
+  const newHumanReview = {
     status: approved ? "approved" : "rejected",
     reviewedBy: attorneyUserId,
-    reviewedAt: new Date(),
+    reviewedAt: new Date().toISOString(),
     attorneyNotes: attorneyNotes || "",
     aiRecommendation: pipeline.decider?.recommendation,
   };
 
-  application.status = approved ? "approved" : "rejected";
-  await syncApplicationProgress(application);
+  const newStatus = approved ? "approved" : "rejected";
+
+  const updated = {
+    ...application,
+    humanReview: newHumanReview,
+    status: newStatus,
+  };
+
+  const { documents, progress, score } = buildProgressUpdate(updated);
+
+  const { data: saved, error } = await supabase
+    .from("applications")
+    .update({
+      human_review: newHumanReview,
+      status: newStatus,
+      documents,
+      progress,
+      score,
+      updated_label: "just now",
+    })
+    .eq("id", application.id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+
+  const finalApp = { ...saved, attorney_name: application.attorney_name };
 
   const callResult = await notifyApplicantByPhone(
-    application,
+    { ...finalApp, applicantName: finalApp.applicant_name, phoneNumber: finalApp.phone_number, pipeline: finalApp.pipeline, humanReview: finalApp.human_review },
     approved ? "approved" : "rejected",
     [
       ...(aiReasons || []),
       attorneyNotes ? `Attorney note: ${attorneyNotes}` : "",
-    ].filter(Boolean),
+    ].filter(Boolean)
   );
 
-  application.callLog = [...(application.callLog || []), callResult];
-  await application.save();
+  const newCallLog = [...(finalApp.call_log || []), callResult];
+  await supabase
+    .from("applications")
+    .update({ call_log: newCallLog })
+    .eq("id", application.id);
 
-  return { application, callResult };
+  finalApp.call_log = newCallLog;
+
+  return { application: finalApp, callResult };
 }
 
-export async function triggerApplicantCall(application, script) {
-  const callResult = await callApplicantWithCustomScript(application, script);
-  application.callLog = [...(application.callLog || []), callResult];
-  await application.save();
-  return application;
+export async function triggerApplicantCall(application, script, supabase) {
+  const callResult = await callApplicantWithCustomScript(
+    { ...application, applicantName: application.applicant_name, phoneNumber: application.phone_number },
+    script
+  );
+  const newCallLog = [...(application.call_log || []), callResult];
+  await supabase
+    .from("applications")
+    .update({ call_log: newCallLog })
+    .eq("id", application.id);
+
+  return { ...application, call_log: newCallLog };
 }
 
 export { runAgentPipeline, notifyApplicantByPhone, callApplicantWithCustomScript };

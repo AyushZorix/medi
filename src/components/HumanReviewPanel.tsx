@@ -362,7 +362,7 @@ export function HumanReviewPanel({ application }: HumanReviewPanelProps) {
             type="button"
             disabled={callMutation.isPending || !statusScript.trim() || !phoneVal.trim()}
             onClick={() => callMutation.mutate()}
-            className="w-full flex items-center justify-center gap-2 border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+            className="w-full flex items-center justify-center gap-2 border-border bg-muted/20 hover:bg-muted/40 cursor-pointer transition-colors"
           >
             {callMutation.isPending ? (
               <Loader2 className="size-4 animate-spin text-primary mr-1" />

@@ -237,7 +237,7 @@ export function DocumentChecklist({ application }: DocumentChecklistProps) {
               )}
 
               {(uploaded || isLocked) && !isReuploading && (
-                <div className="bg-white/[0.01] border border-border/10 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2">
+                <div className="bg-muted/10 border border-border/60 rounded-lg p-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-xs truncate max-w-[300px]">
                     <span className="font-semibold truncate text-muted-foreground">
                       {doc.fileName || "Not uploaded"}
@@ -250,7 +250,7 @@ export function DocumentChecklist({ application }: DocumentChecklistProps) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 px-2 text-xs text-primary hover:text-primary hover:bg-white/5"
+                      className="h-7 px-2 text-xs text-primary hover:text-primary hover:bg-muted"
                       onClick={() => {
                         setReuploading((prev) => ({ ...prev, [doc.docId]: true }));
                         setDrafts((prev) => ({

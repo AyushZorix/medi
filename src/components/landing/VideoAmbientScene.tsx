@@ -22,7 +22,13 @@ export function VideoAmbientScene({ className = "" }: VideoAmbientSceneProps) {
     const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
     camera.position.set(0, 1.2, 5);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (err) {
+      console.warn("Failed to create WebGL context for VideoAmbientScene:", err);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(w, h);
     renderer.setClearColor(0x030305, 1);
@@ -37,7 +43,8 @@ export function VideoAmbientScene({ className = "" }: VideoAmbientSceneProps) {
 
     const textureLoader = new THREE.TextureLoader();
     textureLoader.setCrossOrigin("anonymous");
-    const textures = attorneyUrls.map((url) => textureLoader.load(url));
+    // Add cache buster to prevent CORS errors from browser caching non-CORS responses
+    const textures = attorneyUrls.map((url) => textureLoader.load(url + "&cb=" + Date.now()));
 
     const panels: THREE.Mesh[] = [];
     const panelGeo = new THREE.PlaneGeometry(2.3, 2.9);
