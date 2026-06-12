@@ -827,7 +827,7 @@ app.post("/api/applications/start", async (req, res) => {
 
       const refreshed = await findApplication(existing.id);
 
-      if (phone && oldPhone !== phone) {
+      if (phone && oldPhone !== phone && process.env.AUTO_CALL_ON_START === "true") {
         try {
           const callResult = await (await import("./calls.mjs")).notifyApplicantByPhone(
             { ...refreshed, applicantName: refreshed.applicantName, phoneNumber: refreshed.phoneNumber },
@@ -853,7 +853,7 @@ app.post("/api/applications/start", async (req, res) => {
 
     const application = await createApplicantApplication(user, visaType, phone, attorney.id);
 
-    if (phone) {
+    if (phone && process.env.AUTO_CALL_ON_START === "true") {
       try {
         const callResult = await (await import("./calls.mjs")).notifyApplicantByPhone(
           { ...application, applicantName: application.applicantName, phoneNumber: application.phoneNumber },
