@@ -312,8 +312,8 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        {/* 6 METRIC CARDS ROW */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
+        {/* 4 METRIC CARDS ROW */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Applications</span>
@@ -325,36 +325,6 @@ export function Dashboard() {
               <div className="text-xl font-extrabold text-foreground">{totalApps}</div>
               <p className="text-[9px] font-bold text-success mt-0.5 flex items-center gap-0.5">
                 <TrendingUp className="size-3" /> +12% vs last month
-              </p>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Accepted Cases</span>
-              <div className="size-7 rounded-lg bg-success/10 flex items-center justify-center">
-                <ShieldCheck className="size-4 text-success" />
-              </div>
-            </div>
-            <div className="mt-2.5">
-              <div className="text-xl font-extrabold text-foreground">{approvedApps.length}</div>
-              <p className="text-[9px] font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
-                {successRate}% Success Rate
-              </p>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rejected Cases</span>
-              <div className="size-7 rounded-lg bg-destructive/10 flex items-center justify-center">
-                <XCircle className="size-4 text-destructive" />
-              </div>
-            </div>
-            <div className="mt-2.5">
-              <div className="text-xl font-extrabold text-foreground">{rejectedApps.length}</div>
-              <p className="text-[9px] font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
-                {rejectionRate}% Rejection Rate
               </p>
             </div>
           </GlassCard>
@@ -376,6 +346,21 @@ export function Dashboard() {
 
           <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
             <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Accepted Cases</span>
+              <div className="size-7 rounded-lg bg-success/10 flex items-center justify-center">
+                <ShieldCheck className="size-4 text-success" />
+              </div>
+            </div>
+            <div className="mt-2.5">
+              <div className="text-xl font-extrabold text-foreground">{approvedApps.length}</div>
+              <p className="text-[9px] font-semibold text-muted-foreground mt-0.5 uppercase tracking-wider">
+                {successRate}% Success Rate
+              </p>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
+            <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Avg Vetting Score</span>
               <div className="size-7 rounded-lg bg-violet/10 flex items-center justify-center">
                 <Brain className="size-4 text-violet" />
@@ -388,29 +373,9 @@ export function Dashboard() {
               </p>
             </div>
           </GlassCard>
-
-          <GlassCard className="p-4 relative overflow-hidden flex flex-col justify-between min-h-[105px] border-border/40 hover:border-border/80 transition-all shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Success Rate by Type</span>
-              <div className="size-7 rounded-lg bg-teal/10 flex items-center justify-center">
-                <Activity className="size-4 text-teal" />
-              </div>
-            </div>
-            <div className="mt-1 flex flex-col gap-0.5 justify-center">
-              <div className="flex items-center justify-between text-[9px] font-bold">
-                <span>O-1:</span> <span className="text-primary">{getVisaSuccessRate("O-1")}</span>
-              </div>
-              <div className="flex items-center justify-between text-[9px] font-bold">
-                <span>F-1:</span> <span className="text-success">{getVisaSuccessRate("F-1")}</span>
-              </div>
-              <div className="flex items-center justify-between text-[9px] font-bold">
-                <span>B-1:</span> <span className="text-warning">{getVisaSuccessRate("B-1/B-2")}</span>
-              </div>
-            </div>
-          </GlassCard>
         </motion.div>
 
-        {/* ROW 2: RECENT CASES TABLE & CHARTS OVERVIEW */}
+        {/* ROW 2: RECENT CASES TABLE & INSTANT Q&A ASSISTANT */}
         <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
           {/* Recent Cases Card */}
           <GlassCard className="lg:col-span-2 p-5 border-border/40 shadow-sm flex flex-col justify-between">
@@ -509,429 +474,7 @@ export function Dashboard() {
             </div>
           </GlassCard>
 
-          {/* Applications Overview (SVG line chart + donut) */}
-          <GlassCard className="p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0">
-                <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center justify-between">
-                  <span>Applications Overview</span>
-                  <span className="text-[10px] text-muted-foreground font-semibold bg-muted/40 px-2 py-0.5 rounded-full border border-border/40">This Month</span>
-                </GlassCardTitle>
-                <GlassCardDescription className="text-[10px] mt-0.5">
-                  Approval performance statistics
-                </GlassCardDescription>
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4 space-y-4">
-                <div className="flex items-center justify-between gap-2.5">
-                  {/* SVG line chart (Filings trend) */}
-                  <div className="flex-1 bg-muted/5 border border-border/25 rounded-xl p-2.5">
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide block mb-1">Filing trend</span>
-                    <svg viewBox="0 0 160 80" className="w-full h-[70px]">
-                      <defs>
-                        <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="rgb(99, 102, 241)" stopOpacity="0.15"/>
-                          <stop offset="100%" stopColor="rgb(99, 102, 241)" stopOpacity="0"/>
-                        </linearGradient>
-                      </defs>
-                      <path d="M 0,65 Q 20,40 40,55 T 80,30 T 120,45 T 160,15 L 160,80 L 0,80 Z" fill="url(#trendGrad)" />
-                      <path d="M 0,65 Q 20,40 40,55 T 80,30 T 120,45 T 160,15" fill="none" stroke="rgb(99, 102, 241)" strokeWidth="2" />
-                      <path d="M 0,75 Q 20,65 40,60 T 80,50 T 120,40 T 160,30" fill="none" stroke="rgb(34, 197, 94)" strokeWidth="1.5" strokeDasharray="3" />
-                    </svg>
-                  </div>
-
-                  {/* SVG circular donut chart */}
-                  <div className="shrink-0 flex flex-col items-center p-1.5 bg-muted/5 border border-border/25 rounded-xl">
-                    <svg viewBox="0 0 100 100" className="size-20">
-                      <circle cx="50" cy="50" r="38" fill="transparent" stroke="var(--border)" strokeWidth="10" strokeOpacity="0.3" />
-                      {/* Approved circle */}
-                      <circle cx="50" cy="50" r="38" fill="transparent" stroke="rgb(34, 197, 94)" strokeWidth="10" strokeDasharray={`${238.76 * (successRate / 100)} 238.76`} strokeDashoffset="0" transform="rotate(-90 50 50)" strokeLinecap="round" />
-                      {/* Rejected circle */}
-                      <circle cx="50" cy="50" r="38" fill="transparent" stroke="rgb(239, 68, 68)" strokeWidth="10" strokeDasharray={`${238.76 * (rejectionRate / 100)} 238.76`} strokeDashoffset={-238.76 * (successRate / 100)} transform="rotate(-90 50 50)" strokeLinecap="round" />
-                      {/* Pending circle */}
-                      <circle cx="50" cy="50" r="38" fill="transparent" stroke="rgb(245, 158, 11)" strokeWidth="10" strokeDasharray={`${238.76 * (pendingRate / 100)} 238.76`} strokeDashoffset={-238.76 * ((successRate + rejectionRate) / 100)} transform="rotate(-90 50 50)" strokeLinecap="round" />
-                      <text x="50" y="55" textAnchor="middle" className="font-extrabold text-[15px] fill-foreground">
-                        {totalApps}
-                      </text>
-                    </svg>
-                    <span className="text-[8px] font-extrabold text-muted-foreground mt-1 uppercase tracking-wide">Total cases</span>
-                  </div>
-                </div>
-
-                {/* Legend breakdown */}
-                <div className="grid grid-cols-3 gap-1.5 text-[9px] font-bold text-center">
-                  <div className="p-1 rounded bg-success/5 border border-success/15 text-success">
-                    Approved: {approvedApps.length} ({successRate}%)
-                  </div>
-                  <div className="p-1 rounded bg-destructive/5 border border-destructive/15 text-destructive">
-                    Rejected: {rejectedApps.length} ({rejectionRate}%)
-                  </div>
-                  <div className="p-1 rounded bg-warning/5 border border-warning/15 text-warning">
-                    Pending: {pendingApps.length} ({pendingRate}%)
-                  </div>
-                </div>
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* ROW 3: KANBAN CASE PIPELINE & AI INSIGHTS */}
-        <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
-          {/* Case Pipeline Kanban swimlanes */}
-          <GlassCard className="lg:col-span-2 p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0">
-                <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                  <Activity className="size-4.5 text-indigo animate-pulse" />
-                  Case pipeline
-                </GlassCardTitle>
-                <GlassCardDescription className="text-[10px] mt-0.5">
-                  Live workflow pipeline and stage distributions
-                </GlassCardDescription>
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4">
-                <div className="grid grid-cols-5 gap-2.5">
-                  {kanbanStages.map((stage) => (
-                    <div key={stage.title} className="bg-muted/10 border border-border/30 rounded-xl p-2 min-h-[170px] flex flex-col justify-between hover:bg-muted/20 transition-colors">
-                      <div>
-                        <div className="flex items-center justify-between border-b border-border/40 pb-1.5 mb-2">
-                          <strong className="text-[9px] font-extrabold text-foreground tracking-wide truncate max-w-[50px] md:max-w-[70px]">
-                            {stage.title}
-                          </strong>
-                          <span className="px-1.5 py-0.5 rounded-full text-[8px] font-extrabold bg-muted text-muted-foreground border border-border/40">
-                            {stage.count}
-                          </span>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          {stage.items.map((item) => (
-                            <Link
-                              key={item.id}
-                              to="/app/applications/$id"
-                              params={{ id: item.slug }}
-                              className="block p-1.5 rounded-lg bg-card border border-border/40 shadow-sm hover:border-primary/50 hover:shadow-md transition-all text-[9px]"
-                            >
-                              <div className="font-extrabold text-foreground truncate max-w-[80px]">
-                                {item.applicantName.split(" ")[0]}
-                              </div>
-                              <div className="flex items-center justify-between text-[7px] mt-1 text-muted-foreground font-semibold">
-                                <VisaBadge type={item.visaType} className="scale-75 origin-left" />
-                                <span>{item.score}%</span>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-
-                      {stage.extra > 0 && (
-                        <div className="text-center text-[7px] font-extrabold text-muted-foreground/85 border-t border-border/30 pt-1.5 mt-1 uppercase tracking-wide">
-                          + {stage.extra} more
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-
-          {/* AI Insights & Recommendations (Beta) */}
-          <GlassCard className="p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0">
-                <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                  <Brain className="size-4.5 text-violet animate-pulse" />
-                  AI Insights & Recommendations
-                </GlassCardTitle>
-                <GlassCardDescription className="text-[10px] mt-0.5">
-                  Predictive diagnostics on active caseload
-                </GlassCardDescription>
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4 space-y-3">
-                {/* Rejection Reasons simple bars */}
-                <div className="space-y-1.5 border-b border-border/30 pb-3">
-                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wide block">Top rejection drivers (General)</span>
-                  <div className="space-y-1">
-                    <div>
-                      <div className="flex justify-between text-[8px] font-bold text-foreground">
-                        <span>Insufficient Financial Proof</span>
-                        <span>18 cases (37.5%)</span>
-                      </div>
-                      <ScoreBar value={37.5} tone="destructive" className="h-1 mt-0.5" />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-[8px] font-bold text-foreground">
-                        <span>Inconsistent Information</span>
-                        <span>12 cases (25.0%)</span>
-                      </div>
-                      <ScoreBar value={25} tone="aurora" className="h-1 mt-0.5" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* AI alerts list */}
-                <div className="space-y-2">
-                  {highRiskClients > 0 && (
-                    <div className="flex gap-2 p-2 rounded-xl bg-destructive/5 border border-destructive/15 text-destructive">
-                      <AlertTriangle className="size-4 shrink-0 mt-0.5" />
-                      <div className="text-[9px] font-medium leading-normal">
-                        <strong className="font-extrabold text-[10px] block">High Rejection Risk warnings</strong>
-                        {highRiskClients} cases have a high risk of rejection. Ensure financial proof records are consistent.
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 p-2 rounded-xl bg-success/5 border border-success/15 text-success">
-                    <CheckCircle2 className="size-4 shrink-0 mt-0.5" />
-                    <div className="text-[9px] font-medium leading-normal">
-                      <strong className="font-extrabold text-[10px] block">Success rate improvements</strong>
-                      Caseload approval index holds at {successRate}%. Average AI vetting probability increased in line with OCR pipeline.
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 p-2 rounded-xl bg-primary/5 border border-primary/15 text-primary">
-                    <Brain className="size-4 shrink-0 mt-0.5" />
-                    <div className="text-[9px] font-medium leading-normal">
-                      <strong className="font-extrabold text-[10px] block">Premium processing tips</strong>
-                      Suggest premium processing for active F-1 or O-1 applications facing delays under standard vetting.
-                    </div>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* ROW 4: DOCUMENT TRACKER & DEADLINES */}
-        <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
-          {/* Document & Compliance Tracker */}
-          <GlassCard className="lg:col-span-2 p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0">
-                <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                  <FileText className="size-4.5 text-teal" />
-                  Document & Compliance Tracker
-                </GlassCardTitle>
-                <GlassCardDescription className="text-[10px] mt-0.5">
-                  Mandatory file checklists and compliance states
-                </GlassCardDescription>
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4">
-                <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-muted/10 border border-border/20 p-3 rounded-xl text-center">
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wide block">Total documents</span>
-                    <strong className="text-base font-extrabold text-foreground mt-1.5 block">{totalMandatoryDocs}</strong>
-                  </div>
-                  <div className="bg-success/5 border border-success/15 p-3 rounded-xl text-center">
-                    <span className="text-[8px] font-bold text-success uppercase tracking-wide block">Uploaded</span>
-                    <strong className="text-base font-extrabold text-success mt-1.5 block">
-                      {totalUploadedDocs} <span className="text-[9px] font-normal text-muted-foreground">({totalMandatoryDocs > 0 ? Math.round((totalUploadedDocs/totalMandatoryDocs)*100) : 0}%)</span>
-                    </strong>
-                  </div>
-                  <div className="bg-destructive/5 border border-destructive/15 p-3 rounded-xl text-center">
-                    <span className="text-[8px] font-bold text-destructive uppercase tracking-wide block">Missing / Pending</span>
-                    <strong className="text-base font-extrabold text-destructive mt-1.5 block">{totalMissingDocs}</strong>
-                  </div>
-                  <div className="bg-warning/5 border border-warning/15 p-3 rounded-xl text-center">
-                    <span className="text-[8px] font-bold text-warning uppercase tracking-wide block">Expiring / Reviews</span>
-                    <strong className="text-base font-extrabold text-warning mt-1.5 block">{needsReview}</strong>
-                  </div>
-                </div>
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-
-          {/* Upcoming Deadlines */}
-          <GlassCard className="p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0">
-                <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                  <Calendar className="size-4.5 text-warning" />
-                  Upcoming Deadlines
-                </GlassCardTitle>
-                <GlassCardDescription className="text-[10px] mt-0.5">
-                  Priority milestones needing attorney review
-                </GlassCardDescription>
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4 space-y-2.5">
-                {rfeCases.length === 0 && (
-                  <p className="text-[10px] text-muted-foreground font-semibold text-center py-4 bg-muted/5 border border-border/20 rounded-xl">
-                    No urgent actions or RFEs pending today.
-                  </p>
-                )}
-                {rfeCases.slice(0, 3).map((app, index) => {
-                  const day = 14 + index * 2;
-                  return (
-                    <div key={app.id} className="flex items-center gap-3 p-2 bg-muted/5 border border-border/25 rounded-xl hover:border-border/60 transition-colors">
-                      <div className="size-10 rounded-lg bg-warning/10 border border-warning/20 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[8px] font-extrabold text-warning uppercase tracking-widest leading-none">Jun</span>
-                        <strong className="text-sm font-extrabold text-warning leading-none mt-0.5">{day}</strong>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-extrabold text-foreground truncate">{app.applicantName}</span>
-                          <VisaBadge type={app.visaType} className="scale-75 origin-right" />
-                        </div>
-                        <p className="text-[8px] text-muted-foreground/80 mt-0.5 font-semibold">
-                          RFE Upload Checklist Review due (ID: {app.slug})
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* ROW 5: CLIENT INSIGHTS & Timeline dropdown */}
-        <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
-          {/* Timeline and Case lifecycle bottleneck */}
-          <GlassCard className="lg:col-span-2 p-5 border-border/40 shadow-sm flex flex-col justify-between">
-            <div>
-              <GlassCardHeader className="pb-3 p-0 flex flex-row items-center justify-between">
-                <div>
-                  <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                    <Users className="size-4.5 text-indigo" />
-                    Client Insights & Timelines
-                  </GlassCardTitle>
-                  <GlassCardDescription className="text-[10px] mt-0.5">
-                    Select a client to view their dynamic timelines and lifecycle state.
-                  </GlassCardDescription>
-                </div>
-                {uniqueApplicants.length > 0 && (
-                  <select
-                    value={selectedClient}
-                    onChange={(e) => setSelectedClient(e.target.value)}
-                    className="bg-muted border border-border/50 text-[10px] rounded-lg px-2 py-1 font-bold text-foreground focus:outline-none cursor-pointer"
-                  >
-                    {uniqueApplicants.map((name) => (
-                      <option key={name} value={name}>{name}</option>
-                    ))}
-                  </select>
-                )}
-              </GlassCardHeader>
-
-              <GlassCardContent className="p-0 pt-4 space-y-5">
-                {/* Small Metrics row for the selected client */}
-                <div className="grid grid-cols-4 gap-2.5 text-center">
-                  <div className="p-2 bg-muted/5 border border-border/20 rounded-xl">
-                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Unique Clients</span>
-                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">{totalClients}</strong>
-                  </div>
-                  <div className="p-2 bg-destructive/5 border border-destructive/15 rounded-xl">
-                    <span className="text-[8px] font-bold text-destructive uppercase">High Risk</span>
-                    <strong className="text-sm font-extrabold text-destructive block mt-0.5">{highRiskClients}</strong>
-                  </div>
-                  <div className="p-2 bg-teal/5 border border-teal/15 rounded-xl">
-                    <span className="text-[8px] font-bold text-teal uppercase">Repeat Clients</span>
-                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">{repeatClients}</strong>
-                  </div>
-                  <div className="p-2 bg-violet/5 border border-violet/15 rounded-xl">
-                    <span className="text-[8px] font-bold text-violet uppercase">Approval Prob.</span>
-                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">
-                      {activeApp ? `${activeApp.score}%` : `${avgScore}%`}
-                    </strong>
-                  </div>
-                </div>
-
-                {/* Case lifecycle flowchart */}
-                <div className="border border-border/30 rounded-xl p-4 bg-muted/5">
-                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wide block mb-3">
-                    Active Vetting stages & bottlenecks {activeApp && `— ${activeApp.applicantName} (${activeApp.visaType})`}
-                  </span>
-                  
-                  <div className="relative flex flex-col md:flex-row justify-between gap-4 md:items-center">
-                    {/* Progress Connecting line */}
-                    <div className="absolute top-4 left-4 md:left-0 md:top-4 w-0.5 md:w-full h-[85%] md:h-0.5 bg-border/40 z-0" />
-                    
-                    {lifecycleStages.map((stage, i) => {
-                      const isWarning = stage.status === "warning";
-                      const isCompleted = stage.status === "completed";
-                      return (
-                        <div key={stage.name} className="relative z-10 flex md:flex-col items-start md:items-center gap-2.5 flex-1 md:text-center">
-                          {/* Dot indicator */}
-                          <div className={`size-7 rounded-full flex items-center justify-center border transition-all duration-300 shrink-0 ${
-                            isWarning
-                              ? "bg-destructive/10 border-destructive shadow-[0_0_10px_rgba(239,68,68,0.15)] text-destructive"
-                              : isCompleted
-                                ? "bg-success/20 border-success text-success"
-                                : "bg-muted border-border/60 text-muted-foreground"
-                          }`}>
-                            {isWarning ? (
-                              <AlertTriangle className="size-3.5 text-destructive animate-bounce" />
-                            ) : isCompleted ? (
-                              <Check className="size-3.5" />
-                            ) : (
-                              <span className="text-[9px] font-bold">{i + 1}</span>
-                            )}
-                          </div>
-                          
-                          <div className="flex flex-col md:items-center min-w-0">
-                            <span className="text-[10px] font-extrabold text-foreground leading-tight truncate max-w-[100px]">{stage.name}</span>
-                            <div className="flex items-center gap-1 mt-0.5 text-[8px] text-muted-foreground font-semibold">
-                              <span>Est: {stage.est}</span>
-                              <span>·</span>
-                              <span className={isWarning ? "text-destructive font-bold" : ""}>{stage.act}</span>
-                            </div>
-                            {isWarning && stage.note && (
-                              <span className="mt-1 px-1.5 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-wide bg-destructive/15 text-destructive border border-destructive/20 animate-pulse">
-                                {stage.note}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Individual Case Timelines for Selected Client */}
-                <div className="space-y-3.5">
-                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wide block">Case History Timelines</span>
-                  {clientApps.length === 0 && (
-                    <p className="text-[10px] text-muted-foreground font-medium py-3 text-center bg-muted/5 border border-border/20 rounded-xl">
-                      No timelines recorded.
-                    </p>
-                  )}
-                  {clientApps.map((app, idx) => (
-                    <div key={app.id} className="relative flex gap-3 pl-3">
-                      {idx < clientApps.length - 1 && (
-                        <div className="absolute top-5 left-5 w-0.5 h-[110%] bg-border/40" />
-                      )}
-                      <div className="size-4 rounded-full bg-primary/20 border border-primary flex items-center justify-center shrink-0 mt-1">
-                        <span className="size-1.5 rounded-full bg-primary" />
-                      </div>
-                      <div className="flex-1 bg-muted/5 border border-border/20 rounded-xl p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-border/40 transition-colors">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <strong className="text-xs font-bold text-foreground">{app.applicantName}</strong>
-                            <VisaBadge type={app.visaType} />
-                          </div>
-                          <p className="text-[9px] text-muted-foreground mt-0.5">
-                            Case slug: <span className="font-mono text-[8px]">{app.slug}</span>
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <span className="text-[8px] text-muted-foreground uppercase font-bold block">Approval probability</span>
-                            <strong className="text-xs font-bold text-foreground">{app.score}%</strong>
-                          </div>
-                          <StatusBadge status={app.status} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </GlassCardContent>
-            </div>
-          </GlassCard>
-
-          {/* Q&A panel */}
+          {/* Instant Q&A Assistant */}
           <GlassCard className="p-5 border-border/40 shadow-sm flex flex-col justify-between">
             <div>
               <GlassCardHeader className="pb-3 p-0">
@@ -1089,6 +632,150 @@ export function Dashboard() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
+              </GlassCardContent>
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* ROW 3: CLIENT INSIGHTS & TIMELINES */}
+        <motion.div variants={itemVariants} className="grid gap-6 lg:grid-cols-3">
+          {/* Timeline and Case lifecycle bottleneck */}
+          <GlassCard className="lg:col-span-3 p-5 border-border/40 shadow-sm flex flex-col justify-between">
+            <div>
+              <GlassCardHeader className="pb-3 p-0 flex flex-row items-center justify-between">
+                <div>
+                  <GlassCardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
+                    <Users className="size-4.5 text-indigo" />
+                    Client Insights & Timelines
+                  </GlassCardTitle>
+                  <GlassCardDescription className="text-[10px] mt-0.5">
+                    Select a client to view their dynamic timelines and lifecycle state.
+                  </GlassCardDescription>
+                </div>
+                {uniqueApplicants.length > 0 && (
+                  <select
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    className="bg-muted border border-border/50 text-[10px] rounded-lg px-2 py-1 font-bold text-foreground focus:outline-none cursor-pointer"
+                  >
+                    {uniqueApplicants.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
+                )}
+              </GlassCardHeader>
+
+              <GlassCardContent className="p-0 pt-4 space-y-5">
+                {/* Small Metrics row for the selected client */}
+                <div className="grid grid-cols-4 gap-2.5 text-center">
+                  <div className="p-2 bg-muted/5 border border-border/20 rounded-xl">
+                    <span className="text-[8px] font-bold text-muted-foreground uppercase">Unique Clients</span>
+                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">{totalClients}</strong>
+                  </div>
+                  <div className="p-2 bg-destructive/5 border border-destructive/15 rounded-xl">
+                    <span className="text-[8px] font-bold text-destructive uppercase">High Risk</span>
+                    <strong className="text-sm font-extrabold text-destructive block mt-0.5">{highRiskClients}</strong>
+                  </div>
+                  <div className="p-2 bg-teal/5 border border-teal/15 rounded-xl">
+                    <span className="text-[8px] font-bold text-teal uppercase">Repeat Clients</span>
+                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">{repeatClients}</strong>
+                  </div>
+                  <div className="p-2 bg-violet/5 border border-violet/15 rounded-xl">
+                    <span className="text-[8px] font-bold text-violet uppercase">Approval Prob.</span>
+                    <strong className="text-sm font-extrabold text-foreground block mt-0.5">
+                      {activeApp ? `${activeApp.score}%` : `${avgScore}%`}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Case lifecycle flowchart */}
+                <div className="border border-border/30 rounded-xl p-4 bg-muted/5">
+                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wide block mb-3">
+                    Active Vetting stages & bottlenecks {activeApp && `— ${activeApp.applicantName} (${activeApp.visaType})`}
+                  </span>
+                  
+                  <div className="relative flex flex-col md:flex-row justify-between gap-4 md:items-center">
+                    {/* Progress Connecting line */}
+                    <div className="absolute top-4 left-4 md:left-0 md:top-4 w-0.5 md:w-full h-[85%] md:h-0.5 bg-border/40 z-0" />
+                    
+                    {lifecycleStages.map((stage, i) => {
+                      const isWarning = stage.status === "warning";
+                      const isCompleted = stage.status === "completed";
+                      return (
+                        <div key={stage.name} className="relative z-10 flex md:flex-col items-start md:items-center gap-2.5 flex-1 md:text-center">
+                          {/* Dot indicator */}
+                          <div className={`size-7 rounded-full flex items-center justify-center border transition-all duration-300 shrink-0 ${
+                            isWarning
+                              ? "bg-destructive/10 border-destructive shadow-[0_0_10px_rgba(239,68,68,0.15)] text-destructive"
+                              : isCompleted
+                                ? "bg-success/20 border-success text-success"
+                                : "bg-muted border-border/60 text-muted-foreground"
+                          }`}>
+                            {isWarning ? (
+                              <AlertTriangle className="size-3.5 text-destructive animate-bounce" />
+                            ) : isCompleted ? (
+                              <Check className="size-3.5" />
+                            ) : (
+                              <span className="text-[9px] font-bold">{i + 1}</span>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col md:items-center min-w-0">
+                            <span className="text-[10px] font-extrabold text-foreground leading-tight truncate max-w-[100px]">{stage.name}</span>
+                            <div className="flex items-center gap-1 mt-0.5 text-[8px] text-muted-foreground font-semibold">
+                              <span>Est: {stage.est}</span>
+                              <span>·</span>
+                              <span className={isWarning ? "text-destructive font-bold" : ""}>{stage.act}</span>
+                            </div>
+                            {isWarning && stage.note && (
+                              <span className="mt-1 px-1.5 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-wide bg-destructive/15 text-destructive border border-destructive/20 animate-pulse">
+                                {stage.note}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Individual Case Timelines for Selected Client */}
+                <div className="space-y-3.5">
+                  <span className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wide block">Case History Timelines</span>
+                  {clientApps.length === 0 && (
+                    <p className="text-[10px] text-muted-foreground font-medium py-3 text-center bg-muted/5 border border-border/20 rounded-xl">
+                      No timelines recorded.
+                    </p>
+                  )}
+                  {clientApps.map((app, idx) => (
+                    <div key={app.id} className="relative flex gap-3 pl-3">
+                      {idx < clientApps.length - 1 && (
+                        <div className="absolute top-5 left-5 w-0.5 h-[110%] bg-border/40" />
+                      )}
+                      <div className="size-4 rounded-full bg-primary/20 border border-primary flex items-center justify-center shrink-0 mt-1">
+                        <span className="size-1.5 rounded-full bg-primary" />
+                      </div>
+                      <div className="flex-1 bg-muted/5 border border-border/20 rounded-xl p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-border/40 transition-colors">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <strong className="text-xs font-bold text-foreground">{app.applicantName}</strong>
+                            <VisaBadge type={app.visaType} />
+                          </div>
+                          <p className="text-[9px] text-muted-foreground mt-0.5">
+                            Case slug: <span className="font-mono text-[8px]">{app.slug}</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[8px] text-muted-foreground uppercase font-bold block">Approval probability</span>
+                            <strong className="text-xs font-bold text-foreground">{app.score}%</strong>
+                          </div>
+                          <StatusBadge status={app.status} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </GlassCardContent>
             </div>
