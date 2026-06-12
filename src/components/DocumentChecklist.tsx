@@ -26,6 +26,7 @@ export function DocumentChecklist({ application }: DocumentChecklistProps) {
       uploadDocument(application.slug, { docId, fileName, notes, extractedText }),
     onSuccess: async (data, variables) => {
       await queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+      await queryClient.invalidateQueries({ queryKey: ["applications"] });
       await queryClient.invalidateQueries({ queryKey: ["application", application.slug] });
       toast.success("Document uploaded successfully");
       setReuploading((prev) => ({ ...prev, [variables.docId]: false }));
@@ -37,6 +38,7 @@ export function DocumentChecklist({ application }: DocumentChecklistProps) {
     mutationFn: () => submitApplicationToAttorney(application.slug),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["my-applications"] });
+      await queryClient.invalidateQueries({ queryKey: ["applications"] });
       await queryClient.invalidateQueries({ queryKey: ["application", application.slug] });
       toast.success("Application successfully submitted to attorney!");
     },

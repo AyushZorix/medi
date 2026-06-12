@@ -71,6 +71,7 @@ function Applications() {
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["applications"],
     queryFn: listApplications,
+    refetchInterval: 5000,
   });
 
   // Keep selectedApp updated when rows query invalidates/refreshes
@@ -392,46 +393,44 @@ function Applications() {
                 <h4 className="text-base font-bold flex items-center gap-2 text-foreground shrink-0">
                   <FileText className="size-4.5 text-primary" /> Submitted Documents & OCR Extracted Text
                 </h4>
-                <ScrollArea className="flex-1 pr-2">
-                  <div className="space-y-4 pb-6">
-                    {selectedApp.documents.map((doc) => {
-                      const uploaded = doc.status !== "missing" && Boolean(doc.fileName);
-                      return (
-                        <div key={doc.docId} className="bg-muted/10 border border-border/40 rounded-xl p-4 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              {uploaded ? (
-                                <CheckCircle2 className="size-5 text-success shrink-0" />
-                              ) : (
-                                <FileText className="size-5 text-muted-foreground shrink-0" />
+                <div className="space-y-4 pb-6">
+                  {selectedApp.documents.map((doc) => {
+                    const uploaded = doc.status !== "missing" && Boolean(doc.fileName);
+                    return (
+                      <div key={doc.docId} className="bg-muted/10 border border-border/40 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {uploaded ? (
+                              <CheckCircle2 className="size-5 text-success shrink-0" />
+                            ) : (
+                              <FileText className="size-5 text-muted-foreground shrink-0" />
+                            )}
+                            <div>
+                              <p className="text-sm font-bold truncate max-w-[250px]">{doc.label}</p>
+                              {uploaded && (
+                                <p className="text-xs text-muted-foreground/80 truncate max-w-[200px] mt-0.5">
+                                  File: {doc.fileName}
+                                </p>
                               )}
-                              <div>
-                                <p className="text-sm font-bold truncate max-w-[250px]">{doc.label}</p>
-                                {uploaded && (
-                                  <p className="text-xs text-muted-foreground/80 truncate max-w-[200px] mt-0.5">
-                                    File: {doc.fileName}
-                                  </p>
-                                )}
-                              </div>
                             </div>
-                            <StatusBadge status={uploaded ? "approved" : "needs_info"}>
-                              {uploaded ? "Uploaded" : "Missing"}
-                            </StatusBadge>
                           </div>
+                          <StatusBadge status={uploaded ? "approved" : "needs_info"}>
+                            {uploaded ? "Uploaded" : "Missing"}
+                          </StatusBadge>
+                        </div>
 
-                          <div className="space-y-2 border-t border-border/40 pt-2">
-                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
-                              Extracted text data
-                            </span>
-                            <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[160px] overflow-y-auto leading-relaxed select-all">
-                              {doc.notes || doc.extractedText || getMockOcrText(doc.docId, selectedApp.applicantName, selectedApp.visaType)}
-                            </div>
+                        <div className="space-y-2 border-t border-border/40 pt-2">
+                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                            Extracted text data
+                          </span>
+                          <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[160px] overflow-y-auto leading-relaxed select-all">
+                            {doc.notes || doc.extractedText || getMockOcrText(doc.docId, selectedApp.applicantName, selectedApp.visaType)}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

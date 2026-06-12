@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -6,8 +7,7 @@
 
 /*
  * VisaIQ — AI Visa Processing Platform
- * Design system: deep charcoal, electric indigo, teal/violet glow
- * All colors in oklch. Tokens are the single source of truth.
+ * Design system: globalcodio.ai color combination and typography
  */
 
 @theme inline {
@@ -56,7 +56,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-geist-sans);
+  --font-display: var(--font-geist-serif);
   --font-mono: var(--font-geist-mono);
   --color-destructive-foreground: var(--destructive-foreground);
 
@@ -69,8 +69,9 @@
 }
 
 :root {
-  --font-geist-sans: "Geist Sans", sans-serif;
-  --font-geist-mono: "Geist Mono", monospace;
+  --font-geist-sans: "Inter", system-ui, sans-serif;
+  --font-geist-serif: "Instrument Serif", serif;
+  --font-geist-mono: "JetBrains Mono", monospace;
   --radius: 0.75rem;
 
   /* Minimal light theme (app + landing) */
@@ -582,70 +583,67 @@ html.dark .glass-strong,
 
 .authenticated-theme {
   /* Sleek professional light background - soft off-white/indigo-tinted gray */
-  --landing-bg: oklch(0.96 0.015 270); 
-  --landing-fg: oklch(0.20 0.02 260); /* Deep professional slate */
-  --landing-muted: oklch(0.48 0.02 260); /* Medium slate description text */
-  --landing-border: oklch(0.90 0.02 270 / 0.8); /* Sleek soft borders */
-  --landing-surface: oklch(1 0 0 / 0.8); /* Frosted white glass cards */
-  --landing-accent: oklch(0.58 0.24 285); /* Electric neon purple/violet */
-  --landing-solid-bg: oklch(0.96 0.015 270);
+  --landing-bg: #f6f4f2; 
+  --landing-fg: #0a0b0d; /* Deep professional slate */
+  --landing-muted: #5b616e; /* Medium slate description text */
+  --landing-border: rgba(91, 97, 110, 0.18); /* Sleek soft borders */
+  --landing-surface: #ffffff; /* Frosted white glass cards */
+  --landing-accent: #1950C6; /* Royal Blue */
+  --landing-solid-bg: #f6f4f2;
 
   /* Override theme colors for authenticated view */
   --background: var(--landing-bg);
   --foreground: var(--landing-fg);
   --card: var(--landing-surface);
   --card-foreground: var(--landing-fg);
-  --popover: oklch(1 0 0);
+  --popover: #ffffff;
   --popover-foreground: var(--landing-fg);
   --primary: var(--landing-accent);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.93 0.01 250);
-  --secondary-foreground: var(--landing-fg);
-  --muted: oklch(0.94 0.01 250);
+  --primary-foreground: #ffffff;
+  --secondary: #e8eefc;
+  --secondary-foreground: #1950C6;
+  --muted: #e8eefc;
   --muted-foreground: var(--landing-muted);
-  --accent: oklch(0.92 0.01 250);
-  --accent-foreground: var(--landing-fg);
+  --accent: #e8eefc;
+  --accent-foreground: #1950C6;
   --border: var(--landing-border);
   --input: var(--landing-border);
   --ring: var(--landing-accent);
 
   /* Sidebar: Frosted white sidebar */
-  --sidebar: oklch(1 0 0 / 0.85);
+  --sidebar: #ffffff;
   --sidebar-foreground: var(--landing-fg);
   --sidebar-primary: var(--landing-accent);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.01 250);
-  --sidebar-accent-foreground: var(--landing-fg);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8eefc;
+  --sidebar-accent-foreground: #1950C6;
   --sidebar-border: var(--landing-border);
   --sidebar-ring: var(--landing-accent);
 
   /* Status Colors: Bright & Eye-Catching yet professional */
-  --success: oklch(0.65 0.19 145); /* Vivid emerald green */
-  --success-foreground: oklch(0.20 0.10 145);
-  --warning: oklch(0.76 0.18 70); /* Eye-catching amber/orange */
-  --warning-foreground: oklch(0.25 0.08 70);
-  --destructive: oklch(0.60 0.22 25); /* Professional bright red */
-  --destructive-foreground: oklch(0.99 0 0);
+  --success: #0d7c66; /* Vivid emerald green */
+  --success-foreground: #e6f5f2;
+  --warning: #b45309; /* Eye-catching amber/orange */
+  --warning-foreground: #fef3c7;
+  --destructive: #be123c; /* Professional bright red */
+  --destructive-foreground: #fff1f2;
 
-  --violet: oklch(0.60 0.23 310); /* Bright violet */
-  --teal: oklch(0.70 0.17 190); /* Bright cyan/teal */
-  --indigo: oklch(0.56 0.21 265); /* Vibrant electric indigo */
-  --orange: oklch(0.65 0.20 40); /* Eye-catching orange */
+  --violet: #5b3fa8; /* Bright violet */
+  --teal: #0d7c66; /* Bright cyan/teal */
+  --indigo: #1950C6; /* Vibrant electric indigo */
+  --orange: #b45309; /* Eye-catching orange */
 
   /* Sleek gradients */
-  --gradient-primary: linear-gradient(135deg, oklch(0.58 0.24 285), oklch(0.56 0.21 265));
-  --gradient-aurora: linear-gradient(135deg, oklch(0.56 0.21 265), oklch(0.70 0.17 190));
-  --gradient-glow: radial-gradient(circle at 50% 0%, oklch(0.58 0.24 285 / 0.07), transparent 65%);
-  --gradient-card: linear-gradient(180deg, oklch(1 0 0), oklch(0.99 0 0));
+  --gradient-primary: linear-gradient(135deg, #3f74e8 0%, #1950C6 100%);
+  --gradient-aurora: linear-gradient(135deg, #1950C6 0%, #0d7c66 100%);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(25, 80, 198, 0.08), transparent 60%);
+  --gradient-card: linear-gradient(180deg, #ffffff, #fcfbfa);
 
-  --shadow-glow: 0 4px 24px -8px oklch(0.58 0.24 285 / 0.1);
-  --shadow-elevated: 0 16px 48px -12px oklch(0.58 0.24 285 / 0.12);
+  --shadow-glow: 0 4px 24px -8px rgba(25, 80, 198, 0.12);
+  --shadow-elevated: 0 16px 48px -12px rgba(25, 80, 198, 0.16);
 
   background-color: var(--landing-bg) !important;
-  background-image: 
-    radial-gradient(at 0% 0%, oklch(0.70 0.15 285 / 0.06) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, oklch(0.85 0.12 70 / 0.05) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, oklch(0.68 0.18 190 / 0.04) 0px, transparent 50%) !important;
+  background-image: linear-gradient(180deg, #f9f8f7 0%, #fcfbfa 35%, #ffffff 75%) !important;
   background-attachment: fixed !important;
 }
 
@@ -653,68 +651,68 @@ html.dark .glass-strong,
 .dark .authenticated-theme,
 html.dark .authenticated-theme,
 :root.dark .authenticated-theme {
-  --landing-bg: oklch(0.08 0.07 315); /* Sleek royal purple-plum matches screenshot */
-  --landing-fg: oklch(0.96 0.01 290); /* Silver-white foreground with soft violet tint */
-  --landing-muted: oklch(0.68 0.04 290); /* Lavender description text */
-  --landing-border: rgba(217, 70, 239, 0.12); /* Sophisticated glowing purple glass borders */
-  --landing-surface: rgba(27, 12, 58, 0.7); /* Frosted plum glass matches screenshot */
-  --landing-accent: oklch(0.75 0.17 195); /* Neon Cyan matches screenshot "Dashboard" title and highlights */
-  --landing-solid-bg: oklch(0.08 0.07 315);
+  --landing-bg: #0a0b10; /* Deep slate-indigo matches globalcodio.ai */
+  --landing-fg: #f3f6fe; /* Silver-white foreground */
+  --landing-muted: #8a8f99; /* Lavender description text */
+  --landing-border: rgba(255, 255, 255, 0.08); /* Glowing indigo glass borders */
+  --landing-surface: rgba(25, 80, 198, 0.04); /* Frosted dark glass */
+  --landing-accent: #3f74e8; /* Bright cyan/blue accent */
+  --landing-solid-bg: #0a0b10;
 
   --background: var(--landing-bg);
   --foreground: var(--landing-fg);
   --card: var(--landing-surface);
   --card-foreground: var(--landing-fg);
-  --popover: oklch(0.11 0.06 315 / 0.95);
+  --popover: #0e1017;
   --popover-foreground: var(--landing-fg);
   --primary: var(--landing-accent);
-  --primary-foreground: oklch(0.08 0.07 315); /* Dark text for contrast on cyan elements */
-  --secondary: rgba(43, 18, 76, 0.85); /* Lighter purple-plum */
-  --secondary-foreground: var(--landing-fg);
-  --muted: rgba(23, 10, 45, 0.6);
+  --primary-foreground: #ffffff;
+  --secondary: rgba(25, 80, 198, 0.15);
+  --secondary-foreground: #3f74e8;
+  --muted: rgba(25, 80, 198, 0.1);
   --muted-foreground: var(--landing-muted);
-  --accent: rgba(255, 255, 255, 0.04);
+  --accent: rgba(255, 255, 255, 0.05);
   --accent-foreground: var(--landing-fg);
   --border: var(--landing-border);
-  --input: rgba(217, 70, 239, 0.18);
+  --input: var(--landing-border);
   --ring: var(--landing-accent);
 
   /* Sidebar: Dark frosted sidebar */
-  --sidebar: rgba(18, 8, 38, 0.8);
+  --sidebar: #0e1017;
   --sidebar-foreground: var(--landing-fg);
   --sidebar-primary: var(--landing-accent);
-  --sidebar-primary-foreground: oklch(0.08 0.07 315);
-  --sidebar-accent: rgba(255, 255, 255, 0.06);
-  --sidebar-accent-foreground: var(--landing-fg);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(25, 80, 198, 0.12);
+  --sidebar-accent-foreground: #3f74e8;
   --sidebar-border: var(--landing-border);
   --sidebar-ring: var(--landing-accent);
 
   /* Status Colors: Bright glowing accents for dark mode */
-  --success: oklch(0.78 0.18 150); /* Glowing neon emerald green */
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.75 0.18 350); /* Glowing coral pink/rose matches screenshot active indicator */
-  --warning-foreground: oklch(0.20 0.02 70);
-  --destructive: oklch(0.68 0.22 25); /* Glowing crimson */
-  --destructive-foreground: oklch(0.99 0 0);
+  --success: #11a085; /* Glowing neon emerald green */
+  --success-foreground: #f3f6fe;
+  --warning: #d97706; /* Glowing amber/orange */
+  --warning-foreground: #0a0b10;
+  --destructive: #e05c8a; /* Glowing crimson */
+  --destructive-foreground: #ffffff;
 
-  --violet: oklch(0.68 0.23 310);
-  --teal: oklch(0.75 0.17 195);
-  --indigo: oklch(0.62 0.22 265);
-  --orange: oklch(0.72 0.20 40);
+  --violet: #7c5bc9;
+  --teal: #11a085;
+  --indigo: #3f74e8;
+  --orange: #d97706;
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.75 0.17 195), oklch(0.62 0.22 265));
-  --gradient-aurora: linear-gradient(135deg, oklch(0.62 0.22 265), oklch(0.68 0.23 310));
-  --gradient-glow: radial-gradient(circle at 50% 0%, oklch(0.58 0.22 285 / 0.18), transparent 70%);
-  --gradient-card: linear-gradient(180deg, rgba(35, 15, 75, 0.75), rgba(20, 8, 40, 0.75));
+  --gradient-primary: linear-gradient(135deg, #3f74e8 0%, #1950C6 100%);
+  --gradient-aurora: linear-gradient(135deg, #3f74e8 0%, #11a085 100%);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(63, 116, 232, 0.15), transparent 70%);
+  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 
-  --shadow-glow: 0 4px 24px -6px oklch(0.75 0.17 195 / 0.25);
-  --shadow-elevated: 0 16px 48px -12px oklch(0.75 0.17 195 / 0.35);
+  --shadow-glow: 0 4px 24px -6px rgba(63, 116, 232, 0.25);
+  --shadow-elevated: 0 16px 48px -12px rgba(63, 116, 232, 0.35);
 
   background-color: var(--landing-bg) !important;
   background-image: 
-    radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.16) 0px, transparent 60%), /* Top-right warm purple glow */
-    radial-gradient(at 0% 0%, rgba(6, 225, 236, 0.12) 0px, transparent 60%),  /* Top-left cyan glow */
-    radial-gradient(at 50% 100%, rgba(138, 112, 255, 0.08) 0px, transparent 60%) !important;
+    radial-gradient(at 100% 0%, rgba(25, 80, 198, 0.12) 0px, transparent 55%), /* Top-right warm blue glow */
+    radial-gradient(at 0% 0%, rgba(13, 124, 102, 0.08) 0px, transparent 50%),  /* Top-left cyan glow */
+    radial-gradient(at 50% 100%, rgba(91, 63, 168, 0.08) 0px, transparent 60%) !important;
   background-attachment: fixed !important;
 }
 
@@ -723,17 +721,17 @@ html.dark .authenticated-theme,
   background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+  border: 1px solid rgba(25, 80, 198, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(25, 80, 198, 0.04) !important;
 }
 
 .dark .authenticated-theme .glass,
 html.dark .authenticated-theme .glass,
 :root.dark .authenticated-theme .glass {
-  background: rgba(27, 12, 58, 0.65) !important;
+  background: rgba(14, 16, 23, 0.65) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(217, 70, 239, 0.14) !important;
+  border: 1px solid rgba(25, 80, 198, 0.15) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 
     0 12px 30px rgba(0, 0, 0, 0.45),
@@ -745,16 +743,16 @@ html.dark .authenticated-theme .glass,
   backdrop-filter: blur(28px) !important;
   -webkit-backdrop-filter: blur(28px) !important;
   border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06) !important;
+  box-shadow: 0 8px 32px 0 rgba(25, 80, 198, 0.06) !important;
 }
 
 .dark .authenticated-theme .glass-strong,
 html.dark .authenticated-theme .glass-strong,
 :root.dark .authenticated-theme .glass-strong {
-  background: rgba(33, 14, 72, 0.8) !important;
+  background: rgba(14, 16, 23, 0.8) !important;
   backdrop-filter: blur(28px) !important;
   -webkit-backdrop-filter: blur(28px) !important;
-  border: 1px solid rgba(217, 70, 239, 0.18) !important;
+  border: 1px solid rgba(25, 80, 198, 0.2) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 
     0 16px 40px rgba(0, 0, 0, 0.55),
@@ -771,8 +769,8 @@ html.dark .authenticated-theme .glass-strong,
 .dark .authenticated-theme .dock-panel,
 html.dark .authenticated-theme .dock-panel,
 :root.dark .authenticated-theme .dock-panel {
-  background: rgba(18, 8, 38, 0.85) !important;
-  border: 1px solid rgba(217, 70, 239, 0.12) !important;
+  background: rgba(14, 16, 23, 0.85) !important;
+  border: 1px solid rgba(25, 80, 198, 0.15) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   box-shadow: 
