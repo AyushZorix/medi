@@ -34,5 +34,19 @@ An automated Visa Application Processing and Review System featuring high-fideli
    ```bash
    npm run dev
    ```
-   - Frontend runs on: `http://localhost:5173`
-   - Backend API runs on: `http://localhost:4000`
+    - Frontend runs on: `http://localhost:8080`
+    - Backend API runs on: `http://localhost:4000`
+
+## Features & Intelligent Automation
+
+### 1. Dual-Pipeline Client-Side OCR (QuickSnip)
+- Implements canvas rotation sweeps (0°, 90°, 180°, 270°) to resolve sideways uploads.
+- Grayscale contrast correction and nearest-neighbor canvas upscaling for low-res scans.
+
+### 2. Multi-Agent Verification & Auto-Scoring
+- **Validator Agent**: Parses OCR files for category cues and matches identity signatures.
+- **Consistency Agent**: Cross-checks dates of birth, passport IDs, and SEVIS numbers across different uploads.
+- **Decider Agent**: Forms consensus recommendation (`approve`, `deny`, `needs_info`).
+- **Auto-Pipeline triggers**: Automatically triggers the verification pipeline for happy-path test cases once primary documents are uploaded.
+- **Score Formulation**: Averaging completion rate, validator score, and consistency verification checks:
+  $$\text{Score} = \text{Math.round}\left(\frac{\text{DocsReceived} + \text{IdentityScore} + \text{ConsistencyScore}}{3}\right)$$
