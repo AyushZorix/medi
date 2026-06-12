@@ -248,30 +248,7 @@ async function resolveVerifiedAttorney(attorneyId) {
 async function createApplicantApplication(user, visaType, phoneNumber, attorneyId) {
   const documents = buildDocumentChecklist(visaType, []);
 
-  // Copy matching uploaded documents from user's other applications
-  try {
-    const { data: otherApps } = await supabase
-      .from("applications")
-      .select("documents")
-      .eq("applicant_user_id", user.id);
 
-    for (const otherApp of otherApps || []) {
-      for (const otherDoc of otherApp.documents || []) {
-        if (otherDoc.fileName && otherDoc.status !== "missing") {
-          const match = documents.find((d) => d.docId === otherDoc.docId);
-          if (match && !match.fileName) {
-            match.fileName = otherDoc.fileName;
-            match.notes = otherDoc.notes;
-            match.extractedText = otherDoc.extractedText;
-            match.status = otherDoc.status;
-            match.uploadedAt = otherDoc.uploadedAt;
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.error("Failed to copy documents from other applications:", err);
-  }
 
   const slug = slugForApplicant(user, visaType);
   const baseApp = {
@@ -832,35 +809,6 @@ app.post("/api/applications/start", async (req, res) => {
         updates.status = "processing";
       }
 
-      // Copy docs from other applications
-      try {
-        const { data: otherApps } = await supabase
-          .from("applications")
-          .select("documents")
-          .eq("applicant_user_id", user.id)
-          .neq("id", existing.id);
-
-        const updatedDocs = [...(existing.documents || [])];
-        let modified = false;
-        for (const otherApp of otherApps || []) {
-          for (const otherDoc of otherApp.documents || []) {
-            if (otherDoc.fileName && otherDoc.status !== "missing") {
-              const match = updatedDocs.find((d) => d.docId === otherDoc.docId);
-              if (match && (!match.fileName || match.status === "missing")) {
-                match.fileName = otherDoc.fileName;
-                match.notes = otherDoc.notes;
-                match.extractedText = otherDoc.extractedText;
-                match.status = otherDoc.status;
-                match.uploadedAt = otherDoc.uploadedAt;
-                modified = true;
-              }
-            }
-          }
-        }
-        if (modified) updates.documents = updatedDocs;
-      } catch (err) {
-        console.error("Failed to copy documents:", err);
-      }
 
       if (Object.keys(updates).length) {
         await supabase.from("applications").update(updates).eq("id", existing.id);
