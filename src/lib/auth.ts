@@ -14,7 +14,9 @@ export const PORTAL_HOME: Record<PortalKind, "/app" | "/portal"> = {
 };
 
 const API_BASE =
-  typeof window === "undefined" ? "http://localhost:4000/api" : "/api";
+  typeof window === "undefined"
+    ? (process.env.INTERNAL_API_URL || "http://localhost:4000/api")
+    : (import.meta.env.VITE_API_URL || "/api");
 
 async function parseJson<T>(res: Response): Promise<T> {
   const text = await res.text();

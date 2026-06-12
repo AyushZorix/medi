@@ -35,6 +35,15 @@ function isAllowedOrigin(origin) {
     const { hostname, protocol } = new URL(origin);
     if (protocol !== "http:" && protocol !== "https:") return false;
     if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+    if (hostname.endsWith(".vercel.app")) return true;
+
+    const allowed = process.env.ALLOWED_ORIGINS;
+    if (allowed) {
+      const origins = allowed.split(",").map(o => o.trim());
+      if (origins.includes(origin) || origins.some(o => origin.startsWith(o))) {
+        return true;
+      }
+    }
   } catch {
     return false;
   }
@@ -83,19 +92,21 @@ function signToken(userId) {
 }
 
 function setAuthCookie(res, token) {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("visaiq_token", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 }
 
 function clearAuthCookie(res) {
+  const isProd = process.env.NODE_ENV === "production";
   res.clearCookie("visaiq_token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
   });
 }
 
