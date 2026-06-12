@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { ShaderBackground } from "@/components/ui/shaders-hero-section";
 import { DistortedImage } from "@/components/landing/DistortedImage";
-import Galaxy from "@/components/ui/Galaxy";
+import { MeshGradient } from "@paper-design/shaders-react";
 import { cn } from "@/lib/utils";
 
 const OCEAN_IMAGE =
@@ -30,17 +30,14 @@ export function LandingLayout({ children, className, shader = true, ocean = fals
       style={shader ? { backgroundColor: "transparent" } : undefined}
     >
       {galaxy && (
-        <div className="absolute inset-0 z-0 w-full h-full">
-          <Galaxy
-            mouseRepulsion={true}
-            mouseInteraction={true}
-            density={1.5}
-            glowIntensity={0.5}
-            saturation={0.8}
-            hueShift={240}
-            className="w-full h-full"
+        <div className="absolute inset-0 z-0 w-full h-full bg-black">
+          <MeshGradient
+            className="w-full h-full absolute inset-0 opacity-80"
+            colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]}
+            speed={1.0}
+            backgroundColor="#000000"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-[var(--landing-bg)]" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-[var(--landing-bg)]/80" />
         </div>
       )}
       {ocean && !galaxy && (

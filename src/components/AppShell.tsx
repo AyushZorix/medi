@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { listApplications } from "@/lib/applications";
@@ -62,6 +63,13 @@ export function AppShell() {
   const navigate = useNavigate();
   const { displayName, initials, user, signOut, loading } = useAuth();
 
+  useEffect(() => {
+    document.body.classList.add("authenticated-theme");
+    return () => {
+      document.body.classList.remove("authenticated-theme");
+    };
+  }, []);
+
   const { data: applications = [] } = useQuery({
     queryKey: ["applications"],
     queryFn: listApplications,
@@ -106,7 +114,7 @@ export function AppShell() {
   }
 
   return (
-    <LandingLayout shader={false} className="flex min-h-svh w-full pl-28 authenticated-theme">
+    <LandingLayout shader={false} className="flex min-h-svh w-full authenticated-theme">
       <AppBackground className="flex min-h-svh flex-1 flex-col" nested>
         <Dock items={dockItems} />
         <header className="sticky top-0 z-20 flex h-16 shrink-0 flex-col justify-center gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl md:h-auto md:min-h-16 md:flex-row md:items-center md:gap-3 md:px-6 md:py-3">
@@ -121,13 +129,6 @@ export function AppShell() {
             <AppBreadcrumb />
           </div>
           <div className="flex flex-1 items-center gap-2 md:justify-end">
-            <div className="relative max-w-md flex-1 md:max-w-xs lg:max-w-md">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search applicants, cases…"
-                className="h-9 border-border/60 bg-muted/50 pl-9"
-              />
-            </div>
             <Button
               variant="gradient"
               size="sm"
@@ -185,7 +186,7 @@ export function AppShell() {
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 overflow-x-hidden p-4 md:p-8">
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8 pl-28 md:pl-28">
           <Outlet />
         </main>
       </AppBackground>

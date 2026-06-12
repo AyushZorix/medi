@@ -1,3 +1,5 @@
+import twilio from "twilio";
+
 function hasElevenLabsAgentConfig() {
   return Boolean(
     process.env.ELEVENLABS_API_KEY &&
@@ -69,9 +71,30 @@ async function placeElevenLabsAgentCall(phoneNumber, application, finalDecision,
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    console.error("ElevenLabs outbound call failed:", err);
-    return { error: err || "ElevenLabs outbound call failed" };
+    const errText = await res.text();
+    console.error("ElevenLabs outbound call failed, attempting Twilio fallback. Error:", errText);
+
+    // Attempt Twilio TTS fallback
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      const script = buildCallScript(application, finalDecision, reasons);
+      const twilioCall = await placeTwilioTtsCall(phoneNumber, script);
+      if (!twilioCall.error) {
+        return twilioCall;
+      }
+    }
+
+    let friendlyMessage = errText;
+    try {
+      const parsed = JSON.parse(errText);
+      if (parsed.detail?.code === "document_not_found" || parsed.detail?.status === "document_not_found") {
+        friendlyMessage = `ElevenLabs error: Phone Number ID "${agentPhoneNumberId}" was not found or has expired in your ElevenLabs account. Please check your ELEVENLABS_PHONE_NUMBER_ID.`;
+      } else if (parsed.detail?.message) {
+        friendlyMessage = `ElevenLabs error: ${parsed.detail.message}`;
+      }
+    } catch {
+      // Keep original text
+    }
+    return { error: friendlyMessage || "ElevenLabs outbound call failed" };
   }
 
   const data = await res.json();
@@ -81,6 +104,37 @@ async function placeElevenLabsAgentCall(phoneNumber, application, finalDecision,
     callSid: data.call_sid,
     status: data.status,
   };
+}
+
+function getTwilioClient() {
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  }
+  return null;
+}
+
+async function placeTwilioTtsCall(phoneNumber, script) {
+  const client = getTwilioClient();
+  const fromNumber = process.env.TWILIO_FROM_NUMBER || process.env.TWILIO_PHONE_NUMBER;
+  if (!client || !fromNumber) {
+    return { error: "Twilio credentials not configured" };
+  }
+
+  try {
+    const call = await client.calls.create({
+      twiml: `<Response><Pause length="1"/><Say voice="alice">${script}</Say></Response>`,
+      to: phoneNumber,
+      from: fromNumber,
+    });
+    return {
+      provider: "twilio_tts",
+      callSid: call.sid,
+      status: call.status,
+    };
+  } catch (err) {
+    console.error("Twilio TTS call failed:", err);
+    return { error: err.message || "Twilio TTS call failed" };
+  }
 }
 
 export async function notifyApplicantByPhone(application, finalDecision, reasons = []) {
@@ -160,9 +214,35 @@ export async function callApplicantWithCustomScript(application, script) {
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error("ElevenLabs outbound call failed:", err);
-      return { error: err || "ElevenLabs outbound call failed" };
+      const errText = await res.text();
+      console.error("ElevenLabs outbound call failed, attempting Twilio fallback. Error:", errText);
+
+      // Attempt Twilio TTS fallback
+      if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+        const twilioCall = await placeTwilioTtsCall(phone, script);
+        if (!twilioCall.error) {
+          return {
+            at: new Date(),
+            decision: "custom_call",
+            phone,
+            script,
+            ...twilioCall,
+          };
+        }
+      }
+
+      let friendlyMessage = errText;
+      try {
+        const parsed = JSON.parse(errText);
+        if (parsed.detail?.code === "document_not_found" || parsed.detail?.status === "document_not_found") {
+          friendlyMessage = `ElevenLabs error: Phone Number ID "${agentPhoneNumberId}" was not found or has expired in your ElevenLabs account. Please check your ELEVENLABS_PHONE_NUMBER_ID.`;
+        } else if (parsed.detail?.message) {
+          friendlyMessage = `ElevenLabs error: ${parsed.detail.message}`;
+        }
+      } catch {
+        // Keep original text
+      }
+      return { error: friendlyMessage || "ElevenLabs outbound call failed" };
     }
 
     const data = await res.json();

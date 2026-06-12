@@ -105,11 +105,11 @@ export function AttorneySelect({ value, onChange, disabled, visaType }: Attorney
                   "landing-card rounded-xl p-4 text-left transition-all duration-300 relative overflow-hidden",
                   active
                     ? "border-2 border-primary bg-primary/15 shadow-[0_0_20px_rgba(124,58,237,0.2)]"
-                    : "bg-white/[0.02] border-white/5 opacity-90 hover:opacity-100",
+                    : "bg-muted/30 border-border/50 dark:bg-white/[0.02] dark:border-white/5 opacity-90 hover:opacity-100",
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {attorney.fullName}
                   </p>
                   {active && (

@@ -114,12 +114,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
             __html: `
               (function() {
                 const saved = localStorage.getItem('theme');
-                if (saved === 'light') {
-                  document.documentElement.classList.remove('dark');
-                  document.documentElement.classList.add('light');
-                } else {
+                if (saved === 'dark') {
                   document.documentElement.classList.add('dark');
                   document.documentElement.classList.remove('light');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
                 }
               })()
             `,

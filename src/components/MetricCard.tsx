@@ -34,7 +34,7 @@ export function MetricCard({ label, value, hint, icon: Icon, iconClassName }: Me
               <div className="text-xs md:text-sm font-bold tracking-widest uppercase text-muted-foreground/90 select-none">
                 {label}
               </div>
-              <p className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl text-foreground bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent">
+              <p className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl text-foreground">
                 {value}
               </p>
               {hint && <p className="mt-1.5 text-xs text-muted-foreground/85 font-normal">{hint}</p>}

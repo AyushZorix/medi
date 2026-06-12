@@ -24,8 +24,9 @@ export function AppBreadcrumb() {
   const segments = path.split("/").filter(Boolean);
   const isDetail = segments.length > 2 && segments[1] === "applications";
 
-  const crumbs: { href: string; label: string }[] = [{ href: "/app", label: "Console" }];
+  const crumbs: { href: string; label: string }[] = [];
   if (path !== "/app" && path !== "/app/") {
+    crumbs.push({ href: "/app", label: "Dashboard" });
     const base = `/${segments.slice(0, 2).join("/")}`;
     const label = labels[base] ?? segments[1];
     crumbs.push({ href: base, label });

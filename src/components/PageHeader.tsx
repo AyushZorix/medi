@@ -23,7 +23,7 @@ export function PageHeader({ eyebrow, title, description, actions, portal, class
             <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary/95">{eyebrow}</span>
           )}
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl font-display text-foreground select-none bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent pb-1">
+        <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl font-display text-foreground select-none pb-1">
           {title}
         </h1>
         {description && <p className="max-w-2xl text-base text-muted-foreground/95 leading-relaxed font-medium mt-1">{description}</p>}

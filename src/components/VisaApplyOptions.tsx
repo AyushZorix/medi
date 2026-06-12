@@ -25,12 +25,12 @@ import {
 } from "@/components/ui/select";
 
 const DEFAULT_COUNTRY_CODES = [
-  { code: "+1", label: "🇺🇸 +1" },
-  { code: "+91", label: "🇮🇳 +91" },
-  { code: "+44", label: "🇬🇧 +44" },
-  { code: "+1-CA", label: "🇨🇦 +1" },
-  { code: "+61", label: "🇦🇺 +61" },
-  { code: "+81", label: "🇯🇵 +81" },
+  { code: "+1", label: "US +1" },
+  { code: "+91", label: "IN +91" },
+  { code: "+44", label: "GB +44" },
+  { code: "+1-CA", label: "CA +1" },
+  { code: "+61", label: "AU +61" },
+  { code: "+81", label: "JP +81" },
 ];
 
 const icons: Record<ApplicantVisaChoice, typeof GraduationCap> = {
@@ -152,7 +152,7 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
           (extraCode) => {
             setExtraCountryCodes((prev) => {
               if (prev.some((c) => c.code === extraCode)) return prev;
-              return [...prev, { code: extraCode, label: `🌍 ${extraCode}` }];
+              return [...prev, { code: extraCode, label: `Code: ${extraCode}` }];
             });
           }
         );
@@ -181,7 +181,7 @@ export function VisaApplyOptions({ existingApplications, onStarted }: VisaApplyO
           (extraCode) => {
             setExtraCountryCodes((prev) => {
               if (prev.some((c) => c.code === extraCode)) return prev;
-              return [...prev, { code: extraCode, label: `🌍 ${extraCode}` }];
+              return [...prev, { code: extraCode, label: `Code: ${extraCode}` }];
             });
           }
         );

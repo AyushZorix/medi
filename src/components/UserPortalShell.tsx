@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyApplications } from "@/lib/applications";
@@ -56,6 +57,13 @@ export function UserPortalShell() {
   const navigate = useNavigate();
   const { displayName, initials, user, signOut, loading } = useAuth();
 
+  useEffect(() => {
+    document.body.classList.add("authenticated-theme");
+    return () => {
+      document.body.classList.remove("authenticated-theme");
+    };
+  }, []);
+
   const { data: apps = [] } = useQuery({
     queryKey: ["my-applications"],
     queryFn: getMyApplications,
@@ -102,7 +110,7 @@ export function UserPortalShell() {
   }
 
   return (
-    <LandingLayout shader={false} className="flex min-h-svh w-full pl-28 authenticated-theme">
+    <LandingLayout shader={false} className="flex min-h-svh w-full authenticated-theme">
       <AppBackground className="flex min-h-svh flex-1 flex-col" nested>
         <Dock items={dockItems} />
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl md:px-6">
@@ -156,7 +164,7 @@ export function UserPortalShell() {
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 overflow-x-hidden p-4 md:p-8">
+        <main className="flex-1 overflow-x-hidden p-4 md:p-8 pl-28 md:pl-28">
           <Outlet />
         </main>
       </AppBackground>

@@ -55,9 +55,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: "Inter", "SF Pro Display", system-ui, sans-serif;
-  --font-display: "Inter", "SF Pro Display", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-destructive-foreground: var(--destructive-foreground);
 
   --animate-shimmer: shimmer 2.4s linear infinite;
   --animate-pulse-glow: pulse-glow 2.6s ease-in-out infinite;
@@ -68,6 +69,8 @@
 }
 
 :root {
+  --font-geist-sans: "Geist Sans", sans-serif;
+  --font-geist-mono: "Geist Mono", monospace;
   --radius: 0.75rem;
 
   /* Minimal light theme (app + landing) */
@@ -975,5 +978,4 @@ html.dark .authenticated-theme [role="tab"][data-state="active"],
 .authenticated-theme .avatar-fallback {
   font-size: 1rem !important;
 }
-
 

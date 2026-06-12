@@ -44,6 +44,24 @@ function getMockOcrText(docId: string, applicantName: string, visaType: string):
       
     case "i20":
       return `Form I-20\nCertificate of Eligibility for Nonimmigrant Student Status\nSEVIS ID: N000123456\nSurname: ${lastName}\nGiven Name: ${firstName}\nSchool Name: Stanford University\nProgram of Study: Computer Science\nLevel of Education: Master's\nStart Date: September 20, 2021\nEstimated average Program costs: $75,000/year`;
+
+    case "ds160":
+      return `DS-160 confirmation page\nConfirmation No: AA00892716\nApplicant: ${applicantName}\nVisa Class: B-1/B-2\nBarcoded receipt page scan. Travel authorized.`;
+
+    case "sevis_fee":
+      return `I-901 SEVIS FEE PAYMENT RECEIPT\nSEVIS ID: N000123456\nAmount Paid: $350.00\nBeneficiary: ${applicantName}\nSchool Code: SFR214F00618000\nPayment Status: Confirmed`;
+
+    case "transcripts":
+      return `ACADEMIC TRANSCRIPT\nInstitution: Stanford University\nStudent: ${applicantName}\nDegree: Master of Science in Computer Science\nGPA: 3.92 / 4.00\nCourses completed in AI, algorithms, and deep learning. Official seal present.`;
+
+    case "travel_itinerary":
+      return `TRAVEL ITINERARY\nPassenger: ${applicantName}\nFlight: UA 889 SFO to NRT\nDate: June 15, 2026\nReturn: July 15, 2026\nHotel booking confirmation at Tokyo Hyatt.`;
+
+    case "ties_home":
+      return `EVIDENCE OF HOME TIES\nLand Registry Deed\nOwner: ${applicantName}\nProperty: Apartment 4B, MG Road, Bangalore, India\nValuation statement and property tax receipt.`;
+
+    case "photo":
+      return `PASSPORT PHOTO SPECIFICATION VALIDATION\nDimensions: 2x2 inches\nResolution: 600x600 pixels\nBackground: Plain white\nHead size and position verify against US Department of State criteria.`;
       
     default:
       return `DOCUMENT TYPE: ${docId.toUpperCase()}\nApplicant: ${applicantName}\nVisa Category: ${visaType}\nVerified document metadata scan. All security features present and verified.`;
@@ -124,8 +142,10 @@ export function AttorneyDocumentChecklist({ application }: AttorneyDocumentCheck
           const loading = ocrLoading[doc.docId];
           const hasOcrText = Boolean(doc.notes);
           
-          // Get the current notes value (prefer unsaved local edits if exist, otherwise DB notes)
-          const currentNotesValue = editableNotes[doc.docId] !== undefined ? editableNotes[doc.docId] : (doc.notes || "");
+          // Get the current notes value (prefer unsaved local edits if exist, otherwise DB notes/fallback)
+          const currentNotesValue = editableNotes[doc.docId] !== undefined 
+            ? editableNotes[doc.docId] 
+            : (doc.notes || getMockOcrText(doc.docId, application.applicantName, application.visaType));
           const isSaveDisabled = saveMutation.isPending || currentNotesValue === (doc.notes || "");
 
           return (
@@ -202,7 +222,7 @@ export function AttorneyDocumentChecklist({ application }: AttorneyDocumentCheck
                   </div>
 
                   {/* Extracted Text Editor */}
-                  {(hasOcrText || loading) && (
+                  {(uploaded || loading) && (
                     <div className="space-y-2 border-t border-border/10 pt-3">
                       <Label className="text-xs font-medium text-muted-foreground">
                         Extracted text (Editable)
