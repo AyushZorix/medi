@@ -419,14 +419,16 @@ function Applications() {
                           </StatusBadge>
                         </div>
 
-                        <div className="space-y-2 border-t border-border/40 pt-2">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
-                            Extracted text data
-                          </span>
-                          <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[160px] overflow-y-auto leading-relaxed select-all">
-                            {doc.notes || doc.extractedText || getMockOcrText(doc.docId, selectedApp.applicantName, selectedApp.visaType)}
+                        {uploaded && (
+                          <div className="space-y-2 border-t border-border/40 pt-2">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest block">
+                              Extracted text data
+                            </span>
+                            <div className="bg-muted/20 border border-border/40 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap text-muted-foreground/90 max-h-[160px] overflow-y-auto leading-relaxed select-all">
+                              {doc.notes || doc.extractedText || getMockOcrText(doc.docId, selectedApp.applicantName, selectedApp.visaType)}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
