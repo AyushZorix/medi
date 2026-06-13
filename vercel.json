@@ -1,8 +1,5 @@
 {
-  "rewrites": [
-    {
-      "source": "/((?!assets/|api/|uploads/).*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
