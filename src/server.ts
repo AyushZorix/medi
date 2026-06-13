@@ -69,6 +69,14 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      if (url.pathname.startsWith("/api/")) {
+        const backendUrl = (env as Record<string, string>)?.BACKEND_URL || "https://medi-1-teri.onrender.com";
+        const targetUrl = new URL(url.pathname + url.search, backendUrl);
+        const proxyRequest = new Request(targetUrl.toString(), request);
+        return await fetch(proxyRequest);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
