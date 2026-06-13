@@ -1,7 +1,7 @@
 const API_BASE =
   typeof window === "undefined"
     ? (process.env.INTERNAL_API_URL || "http://localhost:4000/api")
-    : (import.meta.env.VITE_API_URL || "/api");
+    : (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "/api" : "https://medi-1-teri.onrender.com/api"));
 
 export type VerifiedAttorney = {
   id: string;
