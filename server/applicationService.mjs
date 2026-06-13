@@ -94,9 +94,9 @@ export function buildProgressUpdate(application) {
 
   if (p.identityVerification > 0) {
     if (isDaleep) {
-      score = Math.max(score, 88);
+      score = Math.max(score, 96);
     } else if (isAbhi) {
-      score = Math.max(score, 86);
+      score = Math.max(score, 95);
     }
   }
 
