@@ -24,7 +24,7 @@ dotenv.config();
 dotenv.config({ path: path.join(__dirname, "..", ".env.local"), override: true });
 
 const app = express();
-const PORT = Number(process.env.API_PORT) || 4000;
+const PORT = Number(process.env.API_PORT) || Number(process.env.PORT) || 4000;
 const JWT_SECRET = process.env.JWT_SECRET;
 const AUTH_MODE = JWT_SECRET ? "jwt" : "insecure";
 
